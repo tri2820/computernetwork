@@ -9,7 +9,7 @@ export default component$(() => {
 
   return (
     <div class="min-h-screen overflow-hidden bg-neutral-950 text-neutral-50">
-      <button class="group absolute bottom-4 right-4 rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-2 transition hover:scale-105">
+      <button class="group fixed bottom-4 right-4 rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-2 transition hover:scale-105">
         <p class="text-neutral-500 group-hover:text-white">
           Connected to{" "}
           {JSON.stringify(
