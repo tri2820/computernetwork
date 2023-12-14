@@ -1,29 +1,10 @@
 import type { NoSerialize } from "@builder.io/qwik";
-import {
-  $,
-  component$,
-  noSerialize,
-  useOn,
-  useSignal,
-  useStore,
-  useTask$,
-} from "@builder.io/qwik";
-// import Lottie from "lottie-react";
-// import { useEffect, useRef, useState } from "react";
-import heartAnimation from "../../public/heart-animation.json";
-// import { HeartIcon } from "@heroicons/react/24/outline";
-// import dynamic from "next/dynamic";
-// import { LottieRef } from "lottie-react";
+import { $, component$, noSerialize, useOn, useSignal } from "@builder.io/qwik";
 import { HiHeartOutline } from "@qwikest/icons/heroicons";
 
 const tif = (cond: boolean, classNamesTrue: string, classNamesFalse = "") => {
   return cond ? ` ${classNamesTrue} ` : ` ${classNamesFalse} `;
 };
-// import { QwikLottie } from "qwik-lottie";
-
-// const DynamicLottie = dynamic(() => import("lottie-react"), {
-//   //   loading: () => <p>Loading...</p>,
-// });
 
 export default component$(() => {
   const elId = useSignal(`heart-${Math.random()}`);
@@ -66,7 +47,7 @@ export default component$(() => {
       <div class="relative ">
         <HiHeartOutline
           class={
-            "peer/hearticon h-5 w-5 cursor-pointer text-neutral-300 hover:brightness-150" +
+            "peer h-5 w-5 cursor-pointer text-neutral-500 transition hover:text-white" +
             tif(hearted.value, "opacity-0") +
             tif(!hearted.value && clicked.value, "animate-wiggle")
           }
@@ -75,12 +56,12 @@ export default component$(() => {
         <div
           id={elId.value}
           class={
-            "pointer-events-none absolute left-0 top-0 ml-0.5 mt-[1px] h-36 w-36 -translate-x-16 -translate-y-16" +
+            "pointer-events-none absolute left-0 top-0 ml-0.5 mt-[1px] h-36 w-36 -translate-x-16 -translate-y-16 transition peer-hover:brightness-150" +
             tif(!hearted.value, "opacity-0")
           }
         />
       </div>
-      <div class="select-none leading-none">
+      <div class="select-none leading-none text-neutral-500">
         <p>{count.value}</p>
       </div>
     </div>

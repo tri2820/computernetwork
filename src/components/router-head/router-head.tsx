@@ -29,6 +29,7 @@ export const RouterHead = component$(() => {
       ))}
 
       <script src="/lottie.min.js" />
+      <script src="/webtorrent.min.js" />
     </>
   );
 });

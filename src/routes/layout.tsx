@@ -1,5 +1,15 @@
-import { component$, Slot } from "@builder.io/qwik";
+import type { Signal } from "@builder.io/qwik";
+import {
+  component$,
+  createContextId,
+  noSerialize,
+  Slot,
+  useContextProvider,
+  useStore,
+} from "@builder.io/qwik";
 import type { RequestHandler } from "@builder.io/qwik-city";
+import WebtorrentService from "~/components/WebtorrentService";
+import type { GlobalContextType } from "~/me";
 
 export const onGet: RequestHandler = async ({ cacheControl }) => {
   // Control caching for this request for best performance and to reduce hosting costs:
@@ -12,6 +22,24 @@ export const onGet: RequestHandler = async ({ cacheControl }) => {
   });
 };
 
+export const GlobalContext = createContextId<GlobalContextType>("global");
+
 export default component$(() => {
-  return <Slot />;
+  const globalContext = useStore<GlobalContextType>({
+    protocolTorrent: {
+      value: null,
+    },
+    peers: {
+      value: noSerialize({}),
+    },
+  });
+
+  useContextProvider(GlobalContext, globalContext);
+
+  return (
+    <div>
+      <WebtorrentService />
+      <Slot />
+    </div>
+  );
 });

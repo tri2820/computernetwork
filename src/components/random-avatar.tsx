@@ -3,7 +3,7 @@ import { component$ } from "@builder.io/qwik";
 export default component$(() => {
   return (
     <svg
-      class="h-12 w-12 rounded-full"
+      class="h-12 w-12 flex-none rounded-full"
       viewBox="0 0 36 36"
       fill="none"
       role="img"
