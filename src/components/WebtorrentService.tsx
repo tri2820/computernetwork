@@ -15,6 +15,7 @@ export default component$(() => {
   useVisibleTask$(({ track }) => {
     const webtorrent = new window.WebTorrent();
     console.log(webtorrent);
+    globalContext.webtorrent.value = noSerialize(webtorrent);
 
     console.log("add");
     const t = webtorrent.add(magnetURI, undefined, (torrent) => {

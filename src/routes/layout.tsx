@@ -32,6 +32,9 @@ export default component$(() => {
     peers: {
       value: noSerialize({}),
     },
+    webtorrent: {
+      value: null,
+    },
   });
 
   useContextProvider(GlobalContext, globalContext);

@@ -43,8 +43,8 @@ export default component$(() => {
   });
 
   return (
-    <div class="flex items-center space-x-1">
-      <div class="relative ">
+    <div class="flex items-center space-x-1 ">
+      <div class="relative">
         <HiHeartOutline
           class={
             "peer h-5 w-5 cursor-pointer text-neutral-500 transition hover:text-white" +
