@@ -33,14 +33,48 @@ export default class t_computernetwork extends EventEmitter {
         // Buffer looks like <length>:<sent_data> for some reason
         const colonPosition = buf.findIndex(x => x == 58);
         if (colonPosition == -1) return;
-        let data = decode(buf.subarray(colonPosition + 1));
-        console.log('onMessage', data);
+        let message = decode(buf.subarray(colonPosition + 1));
+        console.log('onMessage', message, decode(message.payload));
     }
 
     // Custom methods
-    send(obj: any) {
-        let serializedAsBuffer = encode(obj);
-        console.log('send', serializedAsBuffer)
-        this.wire.extended(NAME, serializedAsBuffer);
+    send({
+        data,
+        publicKey,
+        privateKey
+    }: {
+        data: any,
+        publicKey: Uint8Array,
+        privateKey: Uint8Array
+    }) {
+        const peerSupportThisProtocol = this.wire.peerExtendedHandshake?.m?.t_computernetwork;
+        if (!peerSupportThisProtocol) {
+            console.log('skip sending to', this.wire.peerId);
+            return
+        }
+
+        const payload = encode(data);
+        const hash = window.sodium.crypto_generichash(window.sodium.crypto_generichash_BYTES, payload);
+        console.log('hash', hash);
+
+        // Sign the message
+        const signature = window.sodium.crypto_sign_detached(hash, privateKey)
+        console.log('sig', signature);
+        // // To verify the signature, use the public key
+        // const isValid = 
+        //     window.sodium.crypto_sign_verify_detached(signature, hash, publicKey)
+        //     && window.sodium.crypto_generichash(window.sodium.crypto_generichash_BYTES, payload);
+
+
+        // return;
+        const message = encode({
+            payload,
+            hash,
+            publicKey,
+            signature
+        })
+        console.log('send', message);
+
+        this.wire.extended(NAME, message);
     }
 }

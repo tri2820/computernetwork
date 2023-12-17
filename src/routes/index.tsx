@@ -26,21 +26,18 @@ export default component$(() => {
           >
             <p class="line-clamp-1 text-sm text-neutral-500 transition group-hover:text-white">
               Connected to{" "}
-              {JSON.stringify(
-                Object.keys(globalContext.peers.value ?? {}).length,
-              )}{" "}
-              peers
+              {JSON.stringify(globalContext.wires.value?.length ?? 0)} peers
             </p>
           </button>
 
           {open.value && (
             <ul class="space-y-2 border-t border-neutral-800 px-4 py-2">
-              {Object.keys(globalContext.peers.value ?? {}).map((id) => (
+              {globalContext.wires.value?.map((wire) => (
                 <li
-                  key={id}
+                  key={wire.peerId}
                   class="line-clamp-1 break-all text-neutral-400 transition hover:text-white"
                 >
-                  {id}
+                  {wire.peerId}
                 </li>
               ))}
             </ul>

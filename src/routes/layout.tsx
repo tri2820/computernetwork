@@ -29,10 +29,16 @@ export default component$(() => {
     protocolTorrent: {
       value: null,
     },
-    peers: {
-      value: noSerialize({}),
+    wires: {
+      value: noSerialize([]),
     },
     webtorrent: {
+      value: null,
+    },
+    privateKey: {
+      value: null,
+    },
+    publicKey: {
       value: null,
     },
   });
