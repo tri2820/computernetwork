@@ -26,10 +26,10 @@ export default component$(() => {
     window.sodium = _sodium;
 
     const keyPair = window.sodium.crypto_sign_keypair();
-    globalContext.privateKey.value = noSerialize(keyPair.privateKey);
+    globalContext.privateKey = noSerialize(keyPair.privateKey);
     const publicKey = keyPair.publicKey;
     const id = new Buffer(publicKey).subarray(0, 20);
-    globalContext.publicKey.value = noSerialize(publicKey);
+    globalContext.publicKey = noSerialize(publicKey);
 
     const webtorrent = new window.WebTorrent({
       // @ts-ignore
@@ -38,7 +38,7 @@ export default component$(() => {
       peerId: id,
     });
     console.log(webtorrent);
-    globalContext.webtorrent.value = noSerialize(webtorrent);
+    globalContext.webtorrent = noSerialize(webtorrent);
 
     const t = webtorrent.add(magnetURI, undefined, (torrent) => {
       console.log("Client is downloading:", torrent.infoHash, torrent);
@@ -48,14 +48,14 @@ export default component$(() => {
     });
 
     setInterval(() => {
-      globalContext.wires.value = noSerialize([...(t as any).wires]);
+      globalContext.wires = noSerialize([...(t as any).wires]);
     }, 1000);
 
     t.on("wire", (wire) => {
       wire.use(t_computernetwork);
     });
 
-    globalContext.protocolTorrent.value = noSerialize(t);
+    globalContext.protocolTorrent = noSerialize(t);
   });
 
   return <></>;

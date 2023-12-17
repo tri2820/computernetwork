@@ -1,15 +1,9 @@
 import { $, component$, useContext, useSignal } from "@builder.io/qwik";
 
+import { Form } from "@builder.io/qwik-city";
 import { LuFilePlus2 } from "@qwikest/icons/lucide";
-import RandomAvatar from "./random-avatar";
-import {
-  Form,
-  routeAction$,
-  routeLoader$,
-  z,
-  zod$,
-} from "@builder.io/qwik-city";
 import { GlobalContext } from "~/routes/layout";
+import RandomAvatar from "./random-avatar";
 
 export default component$(() => {
   const content = useSignal<string>();
@@ -21,7 +15,7 @@ export default component$(() => {
       return;
     }
 
-    if (!globalContext.wires.value) {
+    if (!globalContext.wires) {
       console.log("no wire to submit");
       return;
     }
@@ -31,11 +25,11 @@ export default component$(() => {
       date: new Date().toISOString(),
     };
 
-    globalContext.wires.value.forEach((w) => {
+    globalContext.wires.forEach((w) => {
       w.t_computernetwork.send({
         data,
-        privateKey: globalContext.privateKey.value,
-        publicKey: globalContext.publicKey.value,
+        privateKey: globalContext.privateKey,
+        publicKey: globalContext.publicKey,
       });
     });
     content.value = undefined;

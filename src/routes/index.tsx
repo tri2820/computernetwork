@@ -12,7 +12,7 @@ export default component$(() => {
     <div class="relative min-h-screen bg-neutral-950 ">
       <div class="sticky top-0 z-10 flex  items-center border-b border-neutral-800 bg-neutral-900 px-4 py-2">
         <p class="line-clamp-1 break-all text-sm text-neutral-500">
-          Welcome, {(globalContext.webtorrent.value as any)?.peerId}
+          Welcome, {(globalContext.webtorrent as any)?.peerId}
         </p>
       </div>
 
@@ -25,14 +25,13 @@ export default component$(() => {
             class="group w-full px-4 py-2 transition hover:bg-neutral-800"
           >
             <p class="line-clamp-1 text-sm text-neutral-500 transition group-hover:text-white">
-              Connected to{" "}
-              {JSON.stringify(globalContext.wires.value?.length ?? 0)} peers
+              Connected to {globalContext.wires?.length ?? 0} peers
             </p>
           </button>
 
           {open.value && (
             <ul class="space-y-2 border-t border-neutral-800 px-4 py-2">
-              {globalContext.wires.value?.map((wire) => (
+              {globalContext.wires?.map((wire) => (
                 <li
                   key={wire.peerId}
                   class="line-clamp-1 break-all text-neutral-400 transition hover:text-white"

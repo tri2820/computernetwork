@@ -14,13 +14,25 @@ declare global {
     }
 }
 
+export type User = {
+    avatarImageUrl: string,
+    name: string,
+    publicKey: string
+}
+
+export type Post = {
+    user: User,
+    numHeart: number,
+    content: string,
+}
 
 export type GlobalContextType = {
-    protocolTorrent: Signal<NoSerialize<Torrent> | null>,
-    wires: Signal<NoSerialize<Wire[]>>,
-    webtorrent: Signal<NoSerialize<Instance> | null>,
-    privateKey: Signal<NoSerialize<Uint8Array> | null>,
-    publicKey: Signal<NoSerialize<Uint8Array> | null>,
+    protocolTorrent?: NoSerialize<Torrent>,
+    wires?: NoSerialize<Wire[]>,
+    webtorrent?: NoSerialize<Instance>,
+    privateKey?: NoSerialize<Uint8Array>,
+    publicKey?: NoSerialize<Uint8Array>,
+    // posts: Post[]
 }
 
 export { }

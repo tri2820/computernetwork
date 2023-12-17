@@ -25,24 +25,7 @@ export const onGet: RequestHandler = async ({ cacheControl }) => {
 export const GlobalContext = createContextId<GlobalContextType>("global");
 
 export default component$(() => {
-  const globalContext = useStore<GlobalContextType>({
-    protocolTorrent: {
-      value: null,
-    },
-    wires: {
-      value: noSerialize([]),
-    },
-    webtorrent: {
-      value: null,
-    },
-    privateKey: {
-      value: null,
-    },
-    publicKey: {
-      value: null,
-    },
-  });
-
+  const globalContext = useStore<GlobalContextType>({});
   useContextProvider(GlobalContext, globalContext);
 
   return (
