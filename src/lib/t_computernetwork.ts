@@ -1,5 +1,8 @@
 import { Wire } from 'bittorrent-protocol';
+import { decode, encode } from 'cbor-x';
 import { EventEmitter } from 'events';
+
+
 
 const NAME = 't_computernetwork';
 export default class t_computernetwork extends EventEmitter {
@@ -17,7 +20,6 @@ export default class t_computernetwork extends EventEmitter {
     }
 
     onHandshake(infoHash: string, peerId: string, extensions: { [name: string]: boolean; }) {
-        // this._send({ msg_type: 0, piece })
         console.log('onHandshake', infoHash, peerId, extensions)
     }
 
@@ -26,16 +28,19 @@ export default class t_computernetwork extends EventEmitter {
 
     }
 
+
     onMessage(buf: Buffer) {
-        console.log('onMessage', buf)
+        // Buffer looks like <length>:<sent_data> for some reason
+        const colonPosition = buf.findIndex(x => x == 58);
+        if (colonPosition == -1) return;
+        let data = decode(buf.subarray(colonPosition + 1));
+        console.log('onMessage', data);
     }
 
     // Custom methods
-    send() {
-        console.log('send', this.wire.peerIdBuffer)
-        this.wire.extended(NAME,
-            this.wire.peerIdBuffer
-            // Buffer.from([22, 2, 0, 3])
-        );
+    send(obj: any) {
+        let serializedAsBuffer = encode(obj);
+        console.log('send', serializedAsBuffer)
+        this.wire.extended(NAME, serializedAsBuffer);
     }
 }

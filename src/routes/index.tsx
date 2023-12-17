@@ -24,7 +24,7 @@ export default component$(() => {
             }}
             class="group w-full px-4 py-2 transition hover:bg-neutral-800"
           >
-            <p class="line-clamp-1 text-neutral-500 transition group-hover:text-white">
+            <p class="line-clamp-1 text-sm text-neutral-500 transition group-hover:text-white">
               Connected to{" "}
               {JSON.stringify(
                 Object.keys(globalContext.peers.value ?? {}).length,

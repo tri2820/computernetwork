@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "@qwikest/icons": "^0.0.13",
-    "bittorrent-protocol": "^4.1.11"
+    "bittorrent-protocol": "^4.1.11",
+    "cbor-x": "^1.5.6"
   }
 }
