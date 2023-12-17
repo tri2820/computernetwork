@@ -21,9 +21,10 @@ export type User = {
 }
 
 export type Post = {
-    user: User,
-    numHeart: number,
+    id: string,
+    publicKey: string,
     content: string,
+    created_at: number
 }
 
 export type GlobalContextType = {
@@ -32,7 +33,8 @@ export type GlobalContextType = {
     webtorrent?: NoSerialize<Instance>,
     privateKey?: NoSerialize<Uint8Array>,
     publicKey?: NoSerialize<Uint8Array>,
-    // posts: Post[]
+    publicKey_string?: string,
+    posts?: Post[]
 }
 
 export { }

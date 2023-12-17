@@ -1,5 +1,12 @@
 import type { NoSerialize } from "@builder.io/qwik";
-import { $, component$, noSerialize, useOn, useSignal } from "@builder.io/qwik";
+import {
+  $,
+  component$,
+  noSerialize,
+  useOn,
+  useSignal,
+  useVisibleTask$,
+} from "@builder.io/qwik";
 import { HiHeartOutline } from "@qwikest/icons/heroicons";
 
 const tif = (cond: boolean, classNamesTrue: string, classNamesFalse = "") => {
@@ -10,20 +17,18 @@ export default component$(() => {
   const elId = useSignal(`heart-${Math.random()}`);
   const animation = useSignal<NoSerialize<any>>(null);
 
-  useOn(
-    "qvisible",
-    $(async () => {
-      const anim = window.bodymovin.loadAnimation({
-        container: document.getElementById(elId.value),
-        renderer: "svg",
-        loop: false,
-        autoplay: false,
-        path: "/heart-animation.json",
-      });
+  useVisibleTask$(async () => {
+    console.log("debug load animation");
+    const anim = window.bodymovin.loadAnimation({
+      container: document.getElementById(elId.value),
+      renderer: "svg",
+      loop: false,
+      autoplay: false,
+      path: "/heart-animation.json",
+    });
 
-      animation.value = noSerialize(anim);
-    }),
-  );
+    animation.value = noSerialize(anim);
+  });
 
   const hearted = useSignal(false);
   const clicked = useSignal(false);
@@ -35,7 +40,7 @@ export default component$(() => {
     hearted.value = !hearted.value;
     count.value = hearted.value ? 1 : 0;
     const frame = animation.value?.getDuration(true);
-    console.log(frame);
+    console.log("frame", frame);
 
     if (hearted.value) {
       animation.value?.goToAndPlay(0, true);

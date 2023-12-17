@@ -3,20 +3,21 @@ import type { DocumentHead } from "@builder.io/qwik-city";
 import Feed from "~/components/feed";
 import FeedCard from "~/components/feed-card";
 import { GlobalContext } from "./layout";
+import { uint8ArrayToString } from "~/lib/utils";
 
 export default component$(() => {
   const globalContext = useContext(GlobalContext);
   const open = useSignal(false);
 
   return (
-    <div class="relative min-h-screen bg-neutral-950 ">
-      <div class="sticky top-0 z-10 flex  items-center border-b border-neutral-800 bg-neutral-900 px-4 py-2">
+    <div class="relative flex min-h-screen flex-col bg-neutral-950">
+      <div class="sticky top-0 z-10 flex flex-none  items-center border-b border-neutral-800 bg-neutral-900 px-4 py-2">
         <p class="line-clamp-1 break-all text-sm text-neutral-500">
-          Welcome, {(globalContext.webtorrent as any)?.peerId}
+          Welcome, {globalContext.publicKey_string}
         </p>
       </div>
 
-      <div class="overflow-hidden text-neutral-50">
+      <div class="flex flex-1 overflow-hidden  text-neutral-50">
         <div class="fixed bottom-0 right-0 z-10 m-4 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
           <button
             onClick$={() => {
@@ -36,14 +37,18 @@ export default component$(() => {
                   key={wire.peerId}
                   class="line-clamp-1 break-all text-neutral-400 transition hover:text-white"
                 >
-                  {wire.peerId}
+                  {(wire as any).peerExtendedHandshake.publicKey
+                    ? uint8ArrayToString(
+                        (wire as any).peerExtendedHandshake.publicKey,
+                      )
+                    : "<SEEDER>"}
                 </li>
               ))}
             </ul>
           )}
         </div>
 
-        <div class="flex flex-col items-center">
+        <div class="flex flex-1 flex-col items-center">
           <Feed />
         </div>
       </div>

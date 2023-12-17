@@ -21,16 +21,14 @@ export default component$(() => {
     }
 
     const data = {
-      content: content.value.trim(),
-      date: new Date().toISOString(),
+      post: {
+        content: content.value.trim(),
+        created_at: new Date().getTime(),
+      },
     };
 
     globalContext.wires.forEach((w) => {
-      w.t_computernetwork.send({
-        data,
-        privateKey: globalContext.privateKey,
-        publicKey: globalContext.publicKey,
-      });
+      w.t_computernetwork.send(data);
     });
     content.value = undefined;
   });

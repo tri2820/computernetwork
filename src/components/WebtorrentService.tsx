@@ -12,6 +12,7 @@ import t_computernetwork from "~/lib/t_computernetwork";
 import { GlobalContext } from "~/routes/layout";
 import _sodium from "libsodium-wrappers";
 import { hash, arr2text, concat } from "uint8-util";
+import { uint8ArrayToString } from "~/lib/utils";
 
 const magnetURI =
   "magnet:?xt=urn:btih:3731410718f7f86e8b1b5a4fb0ee1419faa11ccd&dn=computernetwork.io&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
@@ -30,6 +31,7 @@ export default component$(() => {
     const publicKey = keyPair.publicKey;
     const id = new Buffer(publicKey).subarray(0, 20);
     globalContext.publicKey = noSerialize(publicKey);
+    globalContext.publicKey_string = uint8ArrayToString(publicKey);
 
     const webtorrent = new window.WebTorrent({
       // @ts-ignore
@@ -52,7 +54,7 @@ export default component$(() => {
     }, 1000);
 
     t.on("wire", (wire) => {
-      wire.use(t_computernetwork);
+      wire.use(t_computernetwork(globalContext));
     });
 
     globalContext.protocolTorrent = noSerialize(t);
