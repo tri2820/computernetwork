@@ -17,14 +17,14 @@ export default component$(() => {
       </div>
 
       <div class="overflow-hidden text-neutral-50">
-        <div class="fixed bottom-0 right-0 z-10 m-4 rounded-xl border border-neutral-800 bg-neutral-900">
+        <div class="fixed bottom-0 right-0 z-10 m-4 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
           <button
             onClick$={() => {
               open.value = !open.value;
             }}
-            class="group w-full px-4 py-2"
+            class="group w-full px-4 py-2 transition hover:bg-neutral-800"
           >
-            <p class="text-neutral-500 transition group-hover:text-white">
+            <p class="line-clamp-1 text-neutral-500 transition group-hover:text-white">
               Connected to{" "}
               {JSON.stringify(
                 Object.keys(globalContext.peers.value ?? {}).length,

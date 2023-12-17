@@ -22,5 +22,13 @@ const magnetURI =
       reject();
     }
   });
-  await p;
+
+  const t = await p;
+
+  const output = document.getElementById("output");
+  const me = document.getElementById("me");
+  setInterval(() => {
+    me.innerText = window.webtorrent.peerId;
+    output.innerText = JSON.stringify(Object.keys(t._peers));
+  }, 1000);
 })();
