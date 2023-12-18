@@ -82,7 +82,7 @@ export default (globalContext: GlobalContextType) => class t_computernetwork ext
                 content: data.post.content,
                 publicKey: uint8ArrayToString(message.publicKey)
             }
-            this.globalContext.posts = [...(this.globalContext.posts ?? []), newPost]
+            this.globalContext.posts = [newPost, ...(this.globalContext.posts ?? [])]
         }
 
     }
@@ -103,14 +103,23 @@ export default (globalContext: GlobalContextType) => class t_computernetwork ext
         const signature = window.sodium.crypto_sign_detached(hash, this.globalContext.privateKey!)
         console.log('sig', signature);
 
-        const message = encode({
+        const _message = {
             payload,
             hash,
             publicKey: this.globalContext.publicKey!,
             signature
-        })
+        }
+        const message = encode(_message)
         console.log('send', message);
 
         this.wire.extended(NAME, message);
+
+        const newPost: Post = {
+            id: uint8ArrayToString(_message.hash),
+            created_at: data.post.created_at,
+            content: data.post.content,
+            publicKey: uint8ArrayToString(_message.publicKey)
+        }
+        this.globalContext.posts = [newPost, ...(this.globalContext.posts ?? [])]
     }
 }

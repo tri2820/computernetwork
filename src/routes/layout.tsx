@@ -7,8 +7,9 @@ import {
   useContextProvider,
   useStore,
 } from "@builder.io/qwik";
-import type { RequestHandler } from "@builder.io/qwik-city";
+import type { DocumentHead, RequestHandler } from "@builder.io/qwik-city";
 import WebtorrentService from "~/components/WebtorrentService";
+import TopBar from "~/components/top-bar";
 import type { GlobalContextType } from "~/me";
 
 export const onGet: RequestHandler = async ({ cacheControl }) => {
@@ -29,9 +30,22 @@ export default component$(() => {
   useContextProvider(GlobalContext, globalContext);
 
   return (
-    <div>
+    <>
       <WebtorrentService />
-      <Slot />
-    </div>
+      <div class="relative flex min-h-screen flex-col bg-neutral-950  text-neutral-50">
+        <TopBar />
+        <Slot />
+      </div>
+    </>
   );
 });
+
+export const head: DocumentHead = {
+  title: "Computer Network",
+  meta: [
+    {
+      name: "description",
+      content: "A decentralized app",
+    },
+  ],
+};
