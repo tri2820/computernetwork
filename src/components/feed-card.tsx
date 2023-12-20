@@ -2,6 +2,7 @@ import { component$ } from "@builder.io/qwik";
 import HeartButton from "~/components/heart-button";
 import type { Post } from "~/me";
 import RandomAvatar from "./random-avatar";
+import PostAttachment from "./post-attachment";
 
 export default component$(({ post }: { post: Post }) => {
   return (
@@ -11,7 +12,9 @@ export default component$(({ post }: { post: Post }) => {
         <div>
           <p class="line-clamp-1 break-all font-bold">{post.publicKey}</p>
           <p class="text-xs text-neutral-400">
-            {new Date(post.created_at).toDateString()}
+            {new Date(post.created_at).toLocaleString("en-US", {
+              timeZoneName: "short",
+            })}
           </p>
         </div>
       </div>
@@ -23,7 +26,7 @@ export default component$(({ post }: { post: Post }) => {
         without relying on meaningful content. Lorem ipsum may be used as a
         placeholder before final copy is available. */}
       </p>
-
+      {post.file && <PostAttachment file={post.file} />}
       <HeartButton />
     </div>
   );

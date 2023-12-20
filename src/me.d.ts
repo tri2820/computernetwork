@@ -12,19 +12,53 @@ declare global {
         Buffer: any
         sodium: typeof _sodium;
     }
+
 }
 
-export type User = {
-    avatarImageUrl: string,
+export type OneOf<T> = {
+    [K in keyof T]: { [_ in K]: T[K] } & { [_ in keyof Omit<T, K>]?: undefined };
+}[keyof T];
+
+export type Result<T> = OneOf<{
+    error: {
+        message: string;
+    };
+    data: T;
+}>;
+
+export type FileInfo = {
     name: string,
-    publicKey: string
+    type: string,
+    size: number
+}
+
+export type FileThroughTorrent = FileInfo & {
+    magnetURI: string,
+}
+
+export type DataPost = {
+    file?: FileThroughTorrent,
+    content: string,
+    created_at: number,
+}
+export type Data = OneOf<{
+    post: DataPost
+}
+>
+
+export type Message = {
+    payload: window.Buffer,
+    hash: Uint8Array,
+    publicKey: Uint8Array,
+    signature: Uint8Array
 }
 
 export type Post = {
     id: string,
     publicKey: string,
     content: string,
-    created_at: number
+    created_at: number,
+    file?: FileThroughTorrent
 }
 
 export type GlobalContextType = {

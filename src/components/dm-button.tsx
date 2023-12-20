@@ -30,7 +30,7 @@ export default component$(() => {
                 ? uint8ArrayToString(
                     (wire as any).peerExtendedHandshake.publicKey,
                   )
-                : "<SEEDER>"}
+                : "Seeder"}
             </li>
           ))}
         </ul>

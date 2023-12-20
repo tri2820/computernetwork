@@ -1,9 +1,9 @@
 import { Wire } from 'bittorrent-protocol';
 import { decode, encode } from 'cbor-x';
 import { EventEmitter } from 'events';
-import { GlobalContextType, Post } from '~/me';
+import { Data, GlobalContextType, Message, Post } from '~/me';
 import { hash, arr2text, concat } from "uint8-util";
-import { uint8ArrayToString } from './utils';
+import { toPost, uint8ArrayToString } from './utils';
 
 
 
@@ -42,7 +42,7 @@ export default (globalContext: GlobalContextType) => class t_computernetwork ext
         const colonPosition = buf.findIndex(x => x == 58);
         if (colonPosition == -1) return;
 
-        let message;
+        let message: Message;
         try {
             message = decode(buf.subarray(colonPosition + 1));
         } catch (e) {
@@ -65,7 +65,7 @@ export default (globalContext: GlobalContextType) => class t_computernetwork ext
         }
 
         console.log('Message', message);
-        let data;
+        let data: Data;
         try {
             data = decode(message.payload);
         } catch (e) {
@@ -76,25 +76,22 @@ export default (globalContext: GlobalContextType) => class t_computernetwork ext
         // TODO: cache message
 
         if (data.post) {
-            const newPost: Post = {
-                id: uint8ArrayToString(message.hash),
-                created_at: data.post.created_at,
-                content: data.post.content,
-                publicKey: uint8ArrayToString(message.publicKey)
-            }
+            console.log(data);
+            const newPost = toPost(message, data.post)
             this.globalContext.posts = [newPost, ...(this.globalContext.posts ?? [])]
         }
 
     }
 
     // Custom methods
-    send(data: any) {
+    send(data: Data) {
         const peerSupportThisProtocol = this.wire.peerExtendedHandshake?.m?.t_computernetwork;
         if (!peerSupportThisProtocol) {
             console.log('skip sending to', this.wire.peerId);
             return
         }
 
+        // Add nonce if ever use proof of work
         const payload = encode(data);
         const hash = window.sodium.crypto_generichash(window.sodium.crypto_generichash_BYTES, payload);
         console.log('hash', hash);
@@ -103,7 +100,7 @@ export default (globalContext: GlobalContextType) => class t_computernetwork ext
         const signature = window.sodium.crypto_sign_detached(hash, this.globalContext.privateKey!)
         console.log('sig', signature);
 
-        const _message = {
+        const _message: Message = {
             payload,
             hash,
             publicKey: this.globalContext.publicKey!,
@@ -114,12 +111,9 @@ export default (globalContext: GlobalContextType) => class t_computernetwork ext
 
         this.wire.extended(NAME, message);
 
-        const newPost: Post = {
-            id: uint8ArrayToString(_message.hash),
-            created_at: data.post.created_at,
-            content: data.post.content,
-            publicKey: uint8ArrayToString(_message.publicKey)
+        if (data.post) {
+            const newPost: Post = toPost(_message, data.post)
+            this.globalContext.posts = [newPost, ...(this.globalContext.posts ?? [])]
         }
-        this.globalContext.posts = [newPost, ...(this.globalContext.posts ?? [])]
     }
 }

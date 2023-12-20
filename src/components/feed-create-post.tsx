@@ -1,15 +1,36 @@
-import { $, component$, useContext, useSignal } from "@builder.io/qwik";
+import type { NoSerialize } from "@builder.io/qwik";
+import {
+  $,
+  component$,
+  noSerialize,
+  useContext,
+  useSignal,
+} from "@builder.io/qwik";
 
-import { Form } from "@builder.io/qwik-city";
 import { LuFilePlus2 } from "@qwikest/icons/lucide";
+import { seed } from "~/lib/utils";
+import type { Data, FileThroughTorrent } from "~/me";
 import { GlobalContext } from "~/routes/layout";
+import PostAttachment from "./post-attachment";
 import RandomAvatar from "./random-avatar";
 
 export default component$(() => {
   const content = useSignal<string>();
+  const file = useSignal<NoSerialize<File>>();
   const globalContext = useContext(GlobalContext);
+  const attachmentDelete = $(() => {
+    file.value = undefined;
+  });
 
-  const onSubmit = $((e: Event) => {
+  const onFileChange = $((e: any) => {
+    const files: File[] = [...e.target.files];
+    const _file = files.at(0);
+    if (!_file) return;
+    console.log("file", _file);
+    file.value = noSerialize(_file);
+  });
+
+  const submit = $(async (e: Event) => {
     if (!content.value) {
       console.log("nothing to submit");
       return;
@@ -20,8 +41,25 @@ export default component$(() => {
       return;
     }
 
-    const data = {
+    if (!globalContext.webtorrent) {
+      console.log("no webtorrent instance");
+      return;
+    }
+
+    let _file: FileThroughTorrent | undefined = undefined;
+    if (file.value) {
+      const torrent = await seed(file.value, globalContext.webtorrent);
+      _file = {
+        magnetURI: torrent.magnetURI,
+        name: file.value.name,
+        type: file.value.type,
+        size: file.value.size,
+      };
+    }
+
+    const data: Data = {
       post: {
+        file: _file,
         content: content.value.trim(),
         created_at: new Date().getTime(),
       },
@@ -30,7 +68,9 @@ export default component$(() => {
     globalContext.wires.forEach((w) => {
       w.t_computernetwork.send(data);
     });
+
     content.value = undefined;
+    file.value = undefined;
   });
 
   return (
@@ -39,11 +79,7 @@ export default component$(() => {
         <RandomAvatar />
       </div>
 
-      <Form
-        class="ml-2 flex-1 space-y-2"
-        action={true as any}
-        onSubmit$={onSubmit}
-      >
+      <div class="ml-2 flex-1 space-y-2">
         <textarea
           name="content"
           bind:value={content}
@@ -53,21 +89,35 @@ export default component$(() => {
           placeholder="What's on your mind?"
         />
 
-        <div class="flex items-center">
-          <button class="flex flex-1 items-center space-x-1 text-neutral-500 transition hover:text-white">
-            <LuFilePlus2 class="h-4 w-4 flex-none" />
-            <p>Add File</p>
-          </button>
+        <div class="flex items-center space-x-2">
+          {file.value ? (
+            <div class="flex-1">
+              <PostAttachment
+                onDeleteClick$={attachmentDelete}
+                file={{
+                  size: file.value.size,
+                  name: file.value.name,
+                  type: file.value.type,
+                }}
+              />
+            </div>
+          ) : (
+            <label class="flex flex-1 cursor-pointer items-center space-x-1 text-neutral-500 transition hover:text-white">
+              <LuFilePlus2 class="h-4 w-4 flex-none" />
+              <p>Add File</p>
+              <input type="file" class="hidden" onChange$={onFileChange} />
+            </label>
+          )}
 
           <button
-            onClick$={() => {}}
+            onClick$={submit}
             type="submit"
             class="flex flex-none items-center space-x-1 rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-neutral-400 transition-all hover:bg-neutral-800 hover:text-white"
           >
             <p>Post</p>
           </button>
         </div>
-      </Form>
+      </div>
     </div>
   );
 });
