@@ -57,11 +57,7 @@ export default component$(() => {
     console.log(webtorrent);
     globalContext.webtorrent = noSerialize(webtorrent);
 
-    const { torrentAwait, torrent } = add(
-      magnetURI,
-      webtorrent,
-      torrentsMetadata,
-    );
+    const { torrent } = add(magnetURI, webtorrent);
 
     if (!torrent) {
       console.log("Could not find protocol torrent");
@@ -72,17 +68,11 @@ export default component$(() => {
       wire.use(t_computernetwork(globalContext));
     });
 
-    const t = await torrentAwait;
-    console.log("Client is downloading:", t.infoHash, t);
-    for (const file of t.files) {
-      console.log(file.name);
-    }
-
     setInterval(() => {
-      globalContext.wires = noSerialize([...(t as any).wires]);
+      globalContext.wires = noSerialize([...(torrent as any).wires]);
     }, 1000);
 
-    globalContext.protocolTorrent = noSerialize(t);
+    globalContext.protocolTorrent = noSerialize(torrent);
   });
 
   return <></>;
