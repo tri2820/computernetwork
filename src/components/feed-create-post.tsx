@@ -22,6 +22,11 @@ export default component$(() => {
     file.value = undefined;
   });
 
+  const reset = $(() => {
+    content.value = undefined;
+    file.value = undefined;
+  });
+
   const onFileChange = $((e: any) => {
     const files: File[] = [...e.target.files];
     const _file = files.at(0);
@@ -43,13 +48,21 @@ export default component$(() => {
         return;
       }
 
-      const torrent = await seed(file.value, globalContext.webtorrent);
-      _file = {
-        magnetURI: torrent.magnetURI,
-        name: file.value.name,
-        type: file.value.type,
-        size: file.value.size,
-      };
+      const { torrentAwait } = seed(
+        file.value,
+        globalContext.webtorrent,
+        globalContext.torrentsMetadata,
+      );
+
+      const torrent = await torrentAwait;
+      if (torrent) {
+        _file = {
+          magnetURI: torrent.magnetURI,
+          name: file.value.name,
+          type: file.value.type,
+          size: file.value.size,
+        };
+      }
     }
 
     console.log("prepare");
@@ -71,6 +84,7 @@ export default component$(() => {
 
     if (!globalContext.wires) {
       console.log("no wire to submit");
+      reset();
       return;
     }
 
@@ -78,8 +92,7 @@ export default component$(() => {
       w.t_computernetwork.send(buffer);
     });
 
-    content.value = undefined;
-    file.value = undefined;
+    reset();
   });
 
   return (

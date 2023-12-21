@@ -2,17 +2,18 @@ import {
   component$,
   noSerialize,
   useContext,
-  useTask$,
   useVisibleTask$,
 } from "@builder.io/qwik";
-import type { Wire } from "bittorrent-protocol";
-import Protocol from "bittorrent-protocol";
 import { Buffer } from "buffer/";
-import t_computernetwork from "~/lib/t_computernetwork";
-import { GlobalContext } from "~/routes/layout";
 import _sodium from "libsodium-wrappers";
-import { hash, arr2text, concat } from "uint8-util";
-import { uint8ArrayToString } from "~/lib/utils";
+import t_computernetwork from "~/lib/t_computernetwork";
+import { add, uint8ArrayToString } from "~/lib/utils";
+import { GlobalContext } from "~/routes/layout";
+
+// @ts-ignore
+
+// @ts-ignore
+import idbKVStore from "idb-kv-store";
 
 const magnetURI =
   "magnet:?xt=urn:btih:3731410718f7f86e8b1b5a4fb0ee1419faa11ccd&dn=computernetwork.io&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
@@ -33,6 +34,20 @@ export default component$(() => {
     globalContext.publicKey = noSerialize(publicKey);
     globalContext.publicKey_string = uint8ArrayToString(publicKey);
 
+    const torrentsMetadata = new idbKVStore("torrentsMetadata");
+    globalContext.torrentsMetadata = noSerialize(torrentsMetadata);
+
+    torrentsMetadata.iterator((err: any, cursor: any) => {
+      if (err) throw err;
+      if (cursor) {
+        const metadata = cursor.value;
+        if (typeof metadata === "object" && metadata != null) {
+          add(metadata, webtorrent);
+        }
+        cursor.continue();
+      }
+    });
+
     const webtorrent = new window.WebTorrent({
       // @ts-ignore
       nodeId: id,
@@ -42,20 +57,30 @@ export default component$(() => {
     console.log(webtorrent);
     globalContext.webtorrent = noSerialize(webtorrent);
 
-    const t = webtorrent.add(magnetURI, undefined, (torrent) => {
-      console.log("Client is downloading:", torrent.infoHash, torrent);
-      for (const file of torrent.files) {
-        console.log(file.name);
-      }
+    const { torrentAwait, torrent } = add(
+      magnetURI,
+      webtorrent,
+      torrentsMetadata,
+    );
+
+    if (!torrent) {
+      console.log("Could not find protocol torrent");
+      return;
+    }
+
+    torrent.on("wire", (wire) => {
+      wire.use(t_computernetwork(globalContext));
     });
+
+    const t = await torrentAwait;
+    console.log("Client is downloading:", t.infoHash, t);
+    for (const file of t.files) {
+      console.log(file.name);
+    }
 
     setInterval(() => {
       globalContext.wires = noSerialize([...(t as any).wires]);
     }, 1000);
-
-    t.on("wire", (wire) => {
-      wire.use(t_computernetwork(globalContext));
-    });
 
     globalContext.protocolTorrent = noSerialize(t);
   });

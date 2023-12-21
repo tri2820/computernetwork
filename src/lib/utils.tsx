@@ -2,22 +2,71 @@ import { encode } from "cbor-x";
 import { Instance, Torrent } from "webtorrent";
 import { Data, DataPost, Message, Post } from "~/me";
 
+// @ts-ignore
+import idbChunkStore from "idb-chunk-store";
+import ParseTorrent from "parse-torrent";
+
 export const uint8ArrayToString = (arr: Uint8Array) => {
     return Buffer.from(arr).toString('base64')
 }
 
-export const seed = (file: File, webtorrent: Instance) => {
-    const p = new Promise<Torrent>((resolve, reject) => {
+const bindMetadataStore = (t: Torrent, torrentsMetadata: any) => {
+    t.on("metadata", async () => {
+        const metadata = await ParseTorrent(t.torrentFile);
+        torrentsMetadata.add(metadata.infoHash, metadata);
+        console.log(`Added`, t.infoHash);
+    });
+}
+
+export const seed = (input: string | string[] | File | File[] | FileList | Buffer | Buffer[], webtorrent: Instance, torrentsMetadata: any) => {
+    let torrent: Torrent | undefined;
+    const torrentAwait = new Promise<Torrent>((resolve, reject) => {
         try {
-            webtorrent.seed(file, undefined, (t) => {
+            torrent = webtorrent.seed(input, {
+                store: idbChunkStore
+            }, (t) => {
                 resolve(t)
             });
+            bindMetadataStore(torrent, torrentsMetadata)
         } catch {
             reject()
         }
     })
-    return p;
+
+
+    return {
+        torrentAwait,
+        torrent
+    }
 }
+
+
+export const add = (input: string | File | Buffer | ParseTorrent.Instance, webtorrent: Instance, 
+    torrentsMetadata?: any
+    ) => {
+    let torrent: Torrent | undefined;
+    const torrentAwait = new Promise<Torrent>((resolve, reject) => {
+        try {
+            torrent = webtorrent.add(input, {
+                store: idbChunkStore
+            }, (t) => {
+                resolve(t)
+            });
+            if (torrentsMetadata) {
+                bindMetadataStore(torrent, torrentsMetadata)
+            }
+        } catch {
+            reject()
+        }
+    })
+
+
+    return {
+        torrentAwait,
+        torrent
+    }
+}
+
 
 export const toPost = (message: Message, datapost: DataPost) => {
     const post: Post = {

@@ -68,7 +68,8 @@ export type GlobalContextType = {
     privateKey?: NoSerialize<Uint8Array>,
     publicKey?: NoSerialize<Uint8Array>,
     publicKey_string?: string,
-    posts?: Post[]
+    posts?: Post[],
+    torrentsMetadata: NoSerialize<any>
 }
 
 export { }

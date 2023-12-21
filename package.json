@@ -53,8 +53,10 @@
     "@qwikest/icons": "^0.0.13",
     "bittorrent-protocol": "^4.1.11",
     "cbor-x": "^1.5.6",
+    "idb-chunk-store": "^1.0.1",
+    "idb-kv-store": "^4.5.0",
     "libsodium-wrappers": "^0.7.13",
-    "localforage": "^1.10.0",
+    "parse-torrent": "^11.0.14",
     "uuid": "^9.0.1"
   }
 }
