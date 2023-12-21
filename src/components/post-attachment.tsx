@@ -4,16 +4,14 @@ import {
   component$,
   noSerialize,
   useContext,
-  useResource$,
   useSignal,
 } from "@builder.io/qwik";
 import { LuLoader2, LuX } from "@qwikest/icons/lucide";
-import { info } from "console";
-import type { Torrent } from "webtorrent";
-import { INFO_HASH_REGEX } from "~/lib/utils";
-import type { FileInfo, FileThroughTorrent } from "~/me";
-import { GlobalContext } from "~/routes/layout";
 import { v4 as uuidv4 } from "uuid";
+import type { Torrent } from "webtorrent";
+import { INFO_HASH_REGEX, MEDIA_EXTENSIONS } from "~/lib/utils";
+import type { FileInfo } from "~/me";
+import { GlobalContext } from "~/routes/layout";
 
 interface PostAttachmentProps {
   onDeleteClick$?: PropFunction<() => void>;
@@ -30,21 +28,22 @@ export default component$((props: PostAttachmentProps) => {
   const infoHash = magnetURI?.match(INFO_HASH_REGEX)?.[1];
   const torrent = useSignal<NoSerialize<Torrent>>();
 
+  const imageRef = useSignal<HTMLMediaElement>();
+
   const process = $((t: Torrent) => {
     appened.value = true;
     t.files.forEach((file) => {
-      const isActuallyImage =
-        file.name.endsWith(".png") ||
-        file.name.endsWith(".jpeg") ||
-        file.name.endsWith(".jpg");
+      const isActuallyImage = MEDIA_EXTENSIONS.image.some((ext) =>
+        file.name.endsWith(ext),
+      );
       if (!isActuallyImage) return;
-      file.appendTo(`#${containerId.value}`);
+      file.renderTo(imageRef.value!);
       open.value = true;
     });
   });
 
   return (
-    <div class="group relative max-h-96">
+    <div class="group relative overflow-hidden">
       <div class="overflow-hidden rounded-xl border border-neutral-800">
         <button
           onClick$={() => {
@@ -97,11 +96,14 @@ export default component$((props: PostAttachmentProps) => {
           {loading.value && <LuLoader2 class="w4 h-4 flex-none animate-spin" />}
         </button>
         <div
-          id={containerId.value}
+          // id={containerId.value}
+          class="max-h-[600px] overflow-hidden "
           style={{
             display: open.value ? "block" : "none",
           }}
-        />
+        >
+          <img ref={imageRef} class="w-full" />
+        </div>
       </div>
 
       {props.onDeleteClick$ && (

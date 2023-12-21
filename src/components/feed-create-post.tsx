@@ -8,8 +8,8 @@ import {
 } from "@builder.io/qwik";
 
 import { LuFilePlus2 } from "@qwikest/icons/lucide";
-import { seed } from "~/lib/utils";
-import type { Data, FileThroughTorrent } from "~/me";
+import { prepareMessage, seed, toPost } from "~/lib/utils";
+import type { Data, FileThroughTorrent, Post } from "~/me";
 import { GlobalContext } from "~/routes/layout";
 import PostAttachment from "./post-attachment";
 import RandomAvatar from "./random-avatar";
@@ -36,18 +36,13 @@ export default component$(() => {
       return;
     }
 
-    if (!globalContext.wires) {
-      console.log("no wire to submit");
-      return;
-    }
-
-    if (!globalContext.webtorrent) {
-      console.log("no webtorrent instance");
-      return;
-    }
-
     let _file: FileThroughTorrent | undefined = undefined;
     if (file.value) {
+      if (!globalContext.webtorrent) {
+        console.log("no webtorrent instance");
+        return;
+      }
+
       const torrent = await seed(file.value, globalContext.webtorrent);
       _file = {
         magnetURI: torrent.magnetURI,
@@ -57,6 +52,7 @@ export default component$(() => {
       };
     }
 
+    console.log("prepare");
     const data: Data = {
       post: {
         file: _file,
@@ -65,8 +61,21 @@ export default component$(() => {
       },
     };
 
+    const { buffer, message } = prepareMessage(
+      data,
+      globalContext.privateKey!,
+      globalContext.publicKey!,
+    );
+    const newPost: Post = toPost(message, data.post);
+    globalContext.posts = [newPost, ...(globalContext.posts ?? [])];
+
+    if (!globalContext.wires) {
+      console.log("no wire to submit");
+      return;
+    }
+
     globalContext.wires.forEach((w) => {
-      w.t_computernetwork.send(data);
+      w.t_computernetwork.send(buffer);
     });
 
     content.value = undefined;

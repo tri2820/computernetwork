@@ -84,36 +84,14 @@ export default (globalContext: GlobalContextType) => class t_computernetwork ext
     }
 
     // Custom methods
-    send(data: Data) {
+    send(buffer: Buffer) {
         const peerSupportThisProtocol = this.wire.peerExtendedHandshake?.m?.t_computernetwork;
         if (!peerSupportThisProtocol) {
             console.log('skip sending to', this.wire.peerId);
             return
         }
-
-        // Add nonce if ever use proof of work
-        const payload = encode(data);
-        const hash = window.sodium.crypto_generichash(window.sodium.crypto_generichash_BYTES, payload);
-        console.log('hash', hash);
-
-        // Sign the message
-        const signature = window.sodium.crypto_sign_detached(hash, this.globalContext.privateKey!)
-        console.log('sig', signature);
-
-        const _message: Message = {
-            payload,
-            hash,
-            publicKey: this.globalContext.publicKey!,
-            signature
-        }
-        const message = encode(_message)
-        console.log('send', message);
-
-        this.wire.extended(NAME, message);
-
-        if (data.post) {
-            const newPost: Post = toPost(_message, data.post)
-            this.globalContext.posts = [newPost, ...(this.globalContext.posts ?? [])]
-        }
+        console.log('send', buffer);
+        this.wire.extended(NAME, buffer);
     }
+
 }
