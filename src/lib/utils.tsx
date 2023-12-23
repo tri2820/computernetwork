@@ -1,6 +1,5 @@
-import { encode } from "cbor-x";
 import { Instance, Torrent } from "webtorrent";
-import { Message, Payload, Post, PostPayload } from "~/me";
+import { Message, Post, PostPayload } from "~/me";
 
 // @ts-ignore
 import idbChunkStore from "idb-chunk-store";
@@ -42,9 +41,9 @@ export const seed = (input: string | string[] | File | File[] | FileList | Buffe
 }
 
 
-export const add = (input: string | File | Buffer | ParseTorrentInstance, webtorrent: Instance, 
+export const add = (input: string | File | Buffer | ParseTorrentInstance, webtorrent: Instance,
     TORRENTS_METADATA?: any
-    ) => {
+) => {
     let torrent: Torrent | undefined;
     const torrentAwait = new Promise<Torrent | undefined>((resolve, reject) => {
         try {
@@ -82,28 +81,6 @@ export const toPost = (message: Message, postpayload: PostPayload) => {
 
 export const INFO_HASH_REGEX = /urn:btih:([a-zA-Z0-9]{40})/;
 
-export const prepareMessage = (payload: Payload, private_key: Uint8Array, public_key: Uint8Array) => {
-    // Add nonce if ever use proof of work
-    const serialized_payload = encode(payload);
-    const hash = window.sodium.crypto_generichash(window.sodium.crypto_generichash_BYTES, serialized_payload);
-    console.log('hash', hash);
-
-    // Sign the message
-    const signature = window.sodium.crypto_sign_detached(hash, private_key)
-    console.log('sig', signature);
-
-    const message: Message = {
-        serialized_payload,
-        hash,
-        public_key,
-        signature
-    }
-    const buffer = encode(message)
-    return {
-        message,
-        buffer
-    }
-}
 
 export const MEDIA_EXTENSIONS = {
     audio: [

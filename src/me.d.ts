@@ -2,6 +2,7 @@ import type { NoSerialize, Signal } from '@builder.io/qwik';
 import type { Instance, Torrent, WebTorrent } from '@types/webtorrent'
 import type { Wire } from 'bittorrent-protocol';
 import type _sodium from "libsodium-wrappers";
+import type { Identity } from './lib/identity';
 
 declare global {
     interface Window {
@@ -68,8 +69,7 @@ export type GlobalContextType = {
     main_torrent?: NoSerialize<Torrent>,
     wires?: NoSerialize<Wire[]>,
     webtorrent?: NoSerialize<Instance>,
-    private_key?: NoSerialize<Uint8Array>,
-    public_key?: NoSerialize<Uint8Array>,
+    identity?: NoSerialize<Identity>,
     public_key_string?: string,
     posts?: Post[],
     TORRENTS_METADATA?: NoSerialize<any>,

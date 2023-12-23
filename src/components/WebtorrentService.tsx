@@ -8,6 +8,10 @@ import {
 import { Buffer } from "buffer";
 import { decode } from "cbor-x";
 import _sodium from "libsodium-wrappers";
+import type {
+  OnExtendedHandshakeType,
+  OnMessageType,
+} from "~/lib/t_computernetwork";
 import t_computernetwork from "~/lib/t_computernetwork";
 import { add, toPost, uint8ArrayToString } from "~/lib/utils";
 import { GlobalContext } from "~/routes/layout";
@@ -15,6 +19,7 @@ import { GlobalContext } from "~/routes/layout";
 import idbKVStore from "idb-kv-store";
 import type { Payload, Message } from "~/me";
 import ParseTorrent from "parse-torrent";
+import { Identity } from "~/lib/identity";
 
 const magnetURI =
   "magnet:?xt=urn:btih:3731410718f7f86e8b1b5a4fb0ee1419faa11ccd&dn=computernetwork.io&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
@@ -22,7 +27,14 @@ const magnetURI =
 export default component$(() => {
   const globalContext = useContext(GlobalContext);
 
-  const onMessage = $((buf: Buffer) => {
+  const onExtendedHandshake: OnExtendedHandshakeType = $((_this, handshake) => {
+    console.log(_this, handshake);
+    // _this.send({
+
+    // })
+  });
+
+  const onMessage: OnMessageType = $((_this, buf) => {
     // Buffer looks like <length>:<sent_data> for some reason
     const colonPosition = buf.findIndex((x) => x == 58);
     if (colonPosition == -1) return;
@@ -73,12 +85,12 @@ export default component$(() => {
     await _sodium.ready;
     window.sodium = _sodium;
 
-    const keyPair = window.sodium.crypto_sign_keypair();
-    globalContext.private_key = noSerialize(keyPair.privateKey);
-    const public_key = keyPair.publicKey;
-    const id = Buffer.from(public_key).subarray(0, 20);
-    globalContext.public_key = noSerialize(public_key);
-    globalContext.public_key_string = uint8ArrayToString(public_key);
+    const identity = new Identity();
+    globalContext.identity = noSerialize(identity);
+    const id = Buffer.from(identity.keyPair.publicKey).subarray(0, 20);
+    globalContext.public_key_string = uint8ArrayToString(
+      identity.keyPair.publicKey,
+    );
 
     const TORRENTS_METADATA = new idbKVStore("TORRENTS_METADATA");
     globalContext.TORRENTS_METADATA = noSerialize(TORRENTS_METADATA);
@@ -112,7 +124,13 @@ export default component$(() => {
     }
 
     torrent.on("wire", (wire) => {
-      wire.use(t_computernetwork(public_key, onMessage));
+      wire.use(
+        t_computernetwork({
+          public_key: identity.keyPair.publicKey,
+          onMessage,
+          onExtendedHandshake,
+        }),
+      );
     });
 
     setInterval(() => {

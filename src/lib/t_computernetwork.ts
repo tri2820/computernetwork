@@ -1,43 +1,25 @@
 import { Wire } from 'bittorrent-protocol';
 import { EventEmitter } from 'events';
 import { QRL } from '@builder.io/qwik';
+import { Message } from '~/me';
+import { encode } from 'cbor-x';
 
 const NAME = 't_computernetwork';
-export type OnMessageType = QRL<(buf: Buffer) => void>;
-export default (public_key: Uint8Array, _onMessage: OnMessageType) => class t_computernetwork extends EventEmitter {
+class t_computernetwork extends EventEmitter {
     static {
         this.prototype.name = NAME;
     }
     name: string;
     wire: Wire;
-    _onMessage: OnMessageType;
 
     constructor(wire: Wire) {
         super()
         this.name = NAME
         this.wire = wire
-        this.wire.extendedHandshake = {
-            ...this.wire.extendedHandshake,
-            public_key
-        }
-        this._onMessage = _onMessage;
     }
 
-    onHandshake(infoHash: string, peerId: string, extensions: { [name: string]: boolean; }) {
-        console.log('onHandshake', infoHash, peerId, extensions)
-    }
-
-    onExtendedHandshake(handshake: { [key: string]: any; }) {
-        console.log('onExtendedHandshake', handshake)
-    }
-
-
-    onMessage(buf: Buffer) {
-        this._onMessage(buf);
-    }
-
-    // Custom methods
-    send(buffer: Buffer) {
+    send(message: Message) {
+        const buffer = encode(message)
         const peerSupportThisProtocol = this.wire.peerExtendedHandshake?.m?.t_computernetwork;
         if (!peerSupportThisProtocol) {
             console.log('skip sending to', this.wire.peerId);
@@ -48,3 +30,36 @@ export default (public_key: Uint8Array, _onMessage: OnMessageType) => class t_co
     }
 
 }
+
+export type OnMessageType = QRL<(_this: t_computernetwork, buf: Buffer) => void>;
+export type OnHandshakeType = QRL<(_this: t_computernetwork, infoHash: string, peerId: string, extensions: { [name: string]: boolean; }) => void>;
+export type OnExtendedHandshakeType = QRL<(_this: t_computernetwork, handshake: { [key: string]: any; }) => void>
+
+type t_computernetworkProps = {
+    public_key: Uint8Array,
+    onHandshake?: OnHandshakeType,
+    onExtendedHandshake?: OnExtendedHandshakeType,
+    onMessage?: OnMessageType,
+}
+
+export default ({
+    public_key,
+    onHandshake,
+    onExtendedHandshake,
+    onMessage
+}: t_computernetworkProps) => class _ extends t_computernetwork {
+        constructor(wire: Wire) {
+            super(wire)
+            this.name = NAME
+            this.wire = wire
+            this.wire.extendedHandshake = {
+                ...this.wire.extendedHandshake,
+                public_key
+            }
+        }
+
+        // Note: first this bind is useless
+        onHandshake = onHandshake?.bind(this, this)
+        onExtendedHandshake = onExtendedHandshake?.bind(this, this)
+        onMessage = onMessage?.bind(this, this)
+    }

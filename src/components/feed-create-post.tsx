@@ -8,8 +8,8 @@ import {
 } from "@builder.io/qwik";
 
 import { LuFilePlus2 } from "@qwikest/icons/lucide";
-import { prepareMessage, seed, toPost } from "~/lib/utils";
-import type { Payload, FileThroughTorrent, Post } from "~/me";
+import { seed, toPost } from "~/lib/utils";
+import type { FileThroughTorrent, Payload, Post } from "~/me";
 import { GlobalContext } from "~/routes/layout";
 import PostAttachment from "./post-attachment";
 import RandomAvatar from "./random-avatar";
@@ -66,7 +66,6 @@ export default component$(() => {
       }
     }
 
-    console.log("prepare");
     const payload: Payload = {
       post: {
         file: _file,
@@ -75,23 +74,23 @@ export default component$(() => {
       },
     };
 
-    const { buffer, message } = prepareMessage(
-      payload,
-      globalContext.private_key!,
-      globalContext.public_key!,
-    );
-    const newPost: Post = toPost(message, payload.post);
-    globalContext.posts = [newPost, ...(globalContext.posts ?? [])];
+    (() => {
+      const message = globalContext.identity?.sign(payload);
 
-    if (!globalContext.wires) {
-      console.log("no wire to submit");
-      reset();
-      return;
-    }
+      if (!message) return;
 
-    globalContext.wires.forEach((w) => {
-      w.t_computernetwork.send(buffer);
-    });
+      const newPost: Post = toPost(message, payload.post);
+      globalContext.posts = [newPost, ...(globalContext.posts ?? [])];
+
+      if (!globalContext.wires) {
+        console.log("no wire to submit");
+        return;
+      }
+
+      globalContext.wires.forEach((w) => {
+        w.t_computernetwork.send(message);
+      });
+    })();
 
     reset();
   });
