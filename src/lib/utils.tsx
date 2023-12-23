@@ -103,3 +103,6 @@ export function hashOf(x : any){
     const hash = window.sodium.crypto_generichash(window.sodium.crypto_generichash_BYTES, serialized);
     return hash
 }
+
+export const equal = (first: Uint8Array, second: Uint8Array) =>
+    first.length === second.length && first.every((value, index) => value === second[index]);

@@ -13,7 +13,14 @@ import type {
   OnMessageType,
 } from "~/lib/t_computernetwork";
 import t_computernetwork from "~/lib/t_computernetwork";
-import { add, hashOf, notEmpty, toPost, uint8ArrayToString } from "~/lib/utils";
+import {
+  add,
+  equal,
+  hashOf,
+  notEmpty,
+  toPost,
+  uint8ArrayToString,
+} from "~/lib/utils";
 import { GlobalContext } from "~/routes/layout";
 // @ts-ignore
 import idbKVStore from "idb-kv-store";
@@ -25,7 +32,6 @@ import type {
 } from "~/me";
 import ParseTorrent from "parse-torrent";
 import { Identity } from "~/lib/identity";
-import { equal } from "uint8-util";
 
 const magnetURI =
   "magnet:?xt=urn:btih:3731410718f7f86e8b1b5a4fb0ee1419faa11ccd&dn=computernetwork.io&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
