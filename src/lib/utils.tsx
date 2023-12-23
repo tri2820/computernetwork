@@ -5,9 +5,10 @@ import { Message, Post, PostPayload } from "~/me";
 import idbChunkStore from "idb-chunk-store";
 import type { Instance as ParseTorrentInstance } from "parse-torrent";
 import { encode } from "cbor-x";
+import { Buffer } from "buffer";
 
 export const uint8ArrayToString = (arr: Uint8Array) => {
-    return window.Buffer.from(arr).toString('base64')
+    return Buffer.from(arr).toString('base64')
 }
 
 const bindMetadataStore = (t: Torrent, table_torrent_metadata: any) => {

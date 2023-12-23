@@ -133,7 +133,7 @@ export default component$(() => {
 
     const identity = new Identity();
     globalContext.identity = noSerialize(identity);
-    const id = window.Buffer.from(identity.keyPair.publicKey).subarray(0, 20);
+    const id = Buffer.from(identity.keyPair.publicKey).subarray(0, 20);
     globalContext.public_key_string = uint8ArrayToString(
       identity.keyPair.publicKey,
     );
