@@ -1,10 +1,10 @@
 import { encode } from "cbor-x";
 import { Instance, Torrent } from "webtorrent";
-import { Payload, Message, Post, PostPayload } from "~/me";
+import { Message, Payload, Post, PostPayload } from "~/me";
 
 // @ts-ignore
 import idbChunkStore from "idb-chunk-store";
-import ParseTorrent from "parse-torrent";
+import type { Instance as ParseTorrentInstance } from "parse-torrent";
 
 export const uint8ArrayToString = (arr: Uint8Array) => {
     return Buffer.from(arr).toString('base64')
@@ -12,8 +12,7 @@ export const uint8ArrayToString = (arr: Uint8Array) => {
 
 const bindMetadataStore = (t: Torrent, TORRENTS_METADATA: any) => {
     t.on("metadata", async () => {
-        const metadata = await ParseTorrent(t.torrentFile);
-        TORRENTS_METADATA.add(metadata.infoHash, metadata);
+        TORRENTS_METADATA.add(t.infoHash, t.torrentFile);
         console.log(`Added`, t.infoHash);
     });
 }
@@ -43,7 +42,7 @@ export const seed = (input: string | string[] | File | File[] | FileList | Buffe
 }
 
 
-export const add = (input: string | File | Buffer | ParseTorrent.Instance, webtorrent: Instance, 
+export const add = (input: string | File | Buffer | ParseTorrentInstance, webtorrent: Instance, 
     TORRENTS_METADATA?: any
     ) => {
     let torrent: Torrent | undefined;

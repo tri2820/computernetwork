@@ -14,6 +14,7 @@ import { GlobalContext } from "~/routes/layout";
 // @ts-ignore
 import idbKVStore from "idb-kv-store";
 import type { Payload, Message } from "~/me";
+import ParseTorrent from "parse-torrent";
 
 const magnetURI =
   "magnet:?xt=urn:btih:3731410718f7f86e8b1b5a4fb0ee1419faa11ccd&dn=computernetwork.io&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
@@ -84,10 +85,12 @@ export default component$(() => {
     TORRENTS_METADATA.iterator((err: any, cursor: any) => {
       if (err) throw err;
       if (cursor) {
-        const metadata = cursor.value;
-        if (typeof metadata === "object" && metadata != null) {
-          add(metadata, webtorrent);
-        }
+        const torrentFile = cursor.value;
+        (async () => {
+          // @ts-ignore
+          const parsed: ParseTorrent.Instance = await ParseTorrent(torrentFile);
+          add(parsed, webtorrent);
+        })();
         cursor.continue();
       }
     });
