@@ -7,7 +7,7 @@ import type { Instance as ParseTorrentInstance } from "parse-torrent";
 import { encode } from "cbor-x";
 
 export const uint8ArrayToString = (arr: Uint8Array) => {
-    return Buffer.from(arr).toString('base64')
+    return window.Buffer.from(arr).toString('base64')
 }
 
 const bindMetadataStore = (t: Torrent, table_torrent_metadata: any) => {
