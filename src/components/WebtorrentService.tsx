@@ -13,7 +13,7 @@ import { add, toPost, uint8ArrayToString } from "~/lib/utils";
 import { GlobalContext } from "~/routes/layout";
 // @ts-ignore
 import idbKVStore from "idb-kv-store";
-import type { Data, Message } from "~/me";
+import type { Payload, Message } from "~/me";
 
 const magnetURI =
   "magnet:?xt=urn:btih:3731410718f7f86e8b1b5a4fb0ee1419faa11ccd&dn=computernetwork.io&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
@@ -42,7 +42,7 @@ export default component$(() => {
       ) &&
       window.sodium.crypto_generichash(
         window.sodium.crypto_generichash_BYTES,
-        message.payload,
+        message.serializedPayload,
       );
 
     if (!isValid) {
@@ -51,17 +51,17 @@ export default component$(() => {
     }
 
     console.log("Message", message);
-    let data: Data;
+    let payload: Payload;
     try {
-      data = decode(message.payload);
+      payload = decode(message.serializedPayload);
     } catch (e) {
-      console.warn("Error decode data", e);
+      console.warn("Error decode", e);
       return;
     }
 
-    if (data.post) {
-      console.log(data);
-      const newPost = toPost(message, data.post);
+    if (payload.post) {
+      console.log(payload);
+      const newPost = toPost(message, payload.post);
       globalContext.posts = [newPost, ...(globalContext.posts ?? [])];
     }
   });

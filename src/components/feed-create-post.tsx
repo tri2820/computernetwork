@@ -9,7 +9,7 @@ import {
 
 import { LuFilePlus2 } from "@qwikest/icons/lucide";
 import { prepareMessage, seed, toPost } from "~/lib/utils";
-import type { Data, FileThroughTorrent, Post } from "~/me";
+import type { Payload, FileThroughTorrent, Post } from "~/me";
 import { GlobalContext } from "~/routes/layout";
 import PostAttachment from "./post-attachment";
 import RandomAvatar from "./random-avatar";
@@ -67,7 +67,7 @@ export default component$(() => {
     }
 
     console.log("prepare");
-    const data: Data = {
+    const payload: Payload = {
       post: {
         file: _file,
         content: content.value.trim(),
@@ -76,11 +76,11 @@ export default component$(() => {
     };
 
     const { buffer, message } = prepareMessage(
-      data,
+      payload,
       globalContext.privateKey!,
       globalContext.publicKey!,
     );
-    const newPost: Post = toPost(message, data.post);
+    const newPost: Post = toPost(message, payload.post);
     globalContext.posts = [newPost, ...(globalContext.posts ?? [])];
 
     if (!globalContext.wires) {

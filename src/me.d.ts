@@ -34,19 +34,27 @@ export type FileThroughTorrent = FileInfo & {
     magnetURI: string,
 }
 
-export type DataPost = {
+export type PostPayload = {
     file?: FileThroughTorrent,
     content: string,
     created_at: number,
 }
-export type Data = OneOf<{
-    post: DataPost,
+
+export type DataAskRecentPosts = {
+    file?: FileThroughTorrent,
+    content: string,
+    created_at: number,
+}
+
+
+export type Payload = OneOf<{
+    post: PostPayload,
     somethingelse: any
 }
 >
 
 export type Message = {
-    payload: Buffer,
+    serializedPayload: Buffer,
     hash: Uint8Array,
     publicKey: Uint8Array,
     signature: Uint8Array
