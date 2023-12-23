@@ -91,9 +91,9 @@ const add = async () => {
   await add();
   // const t = await seed();
   // console.log(t);
-  // if (!hasProtocolTorrent) {
+  // if (!hasmain_torrent) {
 
-  // const hasProtocolTorrent = window.webtorrent.torrents
+  // const hasmain_torrent = window.webtorrent.torrents
   //   .map((t) => t.magnetURI)
   //   .some((uri) => uri == magnetURI);
 

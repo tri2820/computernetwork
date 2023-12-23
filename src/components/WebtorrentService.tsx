@@ -38,7 +38,7 @@ export default component$(() => {
       window.sodium.crypto_sign_verify_detached(
         message.signature,
         message.hash,
-        message.publicKey,
+        message.public_key,
       ) &&
       window.sodium.crypto_generichash(
         window.sodium.crypto_generichash_BYTES,
@@ -73,11 +73,11 @@ export default component$(() => {
     window.sodium = _sodium;
 
     const keyPair = window.sodium.crypto_sign_keypair();
-    globalContext.privateKey = noSerialize(keyPair.privateKey);
-    const publicKey = keyPair.publicKey;
-    const id = Buffer.from(publicKey).subarray(0, 20);
-    globalContext.publicKey = noSerialize(publicKey);
-    globalContext.publicKey_string = uint8ArrayToString(publicKey);
+    globalContext.private_key = noSerialize(keyPair.privateKey);
+    const public_key = keyPair.publicKey;
+    const id = Buffer.from(public_key).subarray(0, 20);
+    globalContext.public_key = noSerialize(public_key);
+    globalContext.public_key_string = uint8ArrayToString(public_key);
 
     const TORRENTS_METADATA = new idbKVStore("TORRENTS_METADATA");
     globalContext.TORRENTS_METADATA = noSerialize(TORRENTS_METADATA);
@@ -109,14 +109,14 @@ export default component$(() => {
     }
 
     torrent.on("wire", (wire) => {
-      wire.use(t_computernetwork(publicKey, onMessage));
+      wire.use(t_computernetwork(public_key, onMessage));
     });
 
     setInterval(() => {
       globalContext.wires = noSerialize([...(torrent as any).wires]);
     }, 1000);
 
-    globalContext.protocolTorrent = noSerialize(torrent);
+    globalContext.main_torrent = noSerialize(torrent);
   });
 
   return <></>;

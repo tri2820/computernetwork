@@ -77,8 +77,8 @@ export default component$(() => {
 
     const { buffer, message } = prepareMessage(
       payload,
-      globalContext.privateKey!,
-      globalContext.publicKey!,
+      globalContext.private_key!,
+      globalContext.public_key!,
     );
     const newPost: Post = toPost(message, payload.post);
     globalContext.posts = [newPost, ...(globalContext.posts ?? [])];

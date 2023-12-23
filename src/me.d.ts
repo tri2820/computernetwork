@@ -40,41 +40,37 @@ export type PostPayload = {
     created_at: number,
 }
 
-export type DataAskRecentPosts = {
-    file?: FileThroughTorrent,
-    content: string,
-    created_at: number,
+export type QueryPostPayload = {
+    // no-op
 }
-
 
 export type Payload = OneOf<{
     post: PostPayload,
-    somethingelse: any
-}
->
+    query_post: QueryPostPayload
+}>
 
 export type Message = {
     serializedPayload: Buffer,
     hash: Uint8Array,
-    publicKey: Uint8Array,
+    public_key: Uint8Array,
     signature: Uint8Array
 }
 
 export type Post = {
     id: string,
-    publicKey: string,
+    public_key: string,
     content: string,
     created_at: number,
     file?: FileThroughTorrent
 }
 
 export type GlobalContextType = {
-    protocolTorrent?: NoSerialize<Torrent>,
+    main_torrent?: NoSerialize<Torrent>,
     wires?: NoSerialize<Wire[]>,
     webtorrent?: NoSerialize<Instance>,
-    privateKey?: NoSerialize<Uint8Array>,
-    publicKey?: NoSerialize<Uint8Array>,
-    publicKey_string?: string,
+    private_key?: NoSerialize<Uint8Array>,
+    public_key?: NoSerialize<Uint8Array>,
+    public_key_string?: string,
     posts?: Post[],
     TORRENTS_METADATA?: NoSerialize<any>,
     LOCAL_STATE?: NoSerialize<any>

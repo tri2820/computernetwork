@@ -4,7 +4,7 @@ import { QRL } from '@builder.io/qwik';
 
 const NAME = 't_computernetwork';
 export type OnMessageType = QRL<(buf: Buffer) => void>;
-export default (publicKey: Uint8Array, _onMessage: OnMessageType) => class t_computernetwork extends EventEmitter {
+export default (public_key: Uint8Array, _onMessage: OnMessageType) => class t_computernetwork extends EventEmitter {
     static {
         this.prototype.name = NAME;
     }
@@ -18,7 +18,7 @@ export default (publicKey: Uint8Array, _onMessage: OnMessageType) => class t_com
         this.wire = wire
         this.wire.extendedHandshake = {
             ...this.wire.extendedHandshake,
-            publicKey
+            public_key
         }
         this._onMessage = _onMessage;
     }

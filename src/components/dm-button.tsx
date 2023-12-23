@@ -26,9 +26,9 @@ export default component$(() => {
               key={wire.peerId}
               class="line-clamp-1 break-all text-neutral-400 transition hover:text-white"
             >
-              {(wire as any).peerExtendedHandshake.publicKey
+              {(wire as any).peerExtendedHandshake.public_key
                 ? uint8ArrayToString(
-                    (wire as any).peerExtendedHandshake.publicKey,
+                    (wire as any).peerExtendedHandshake.public_key,
                   )
                 : "Seeder"}
             </li>

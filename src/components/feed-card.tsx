@@ -10,7 +10,7 @@ export default component$(({ post }: { post: Post }) => {
       <div class="flex flex-row items-center space-x-2">
         <RandomAvatar />
         <div>
-          <p class="line-clamp-1 break-all font-bold">{post.publicKey}</p>
+          <p class="line-clamp-1 break-all font-bold">{post.public_key}</p>
           <p class="text-xs text-neutral-400">
             {new Date(post.created_at).toLocaleString("en-US", {
               timeZoneName: "short",

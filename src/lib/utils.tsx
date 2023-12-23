@@ -75,7 +75,7 @@ export const toPost = (message: Message, postpayload: PostPayload) => {
         id: uint8ArrayToString(message.hash),
         created_at: postpayload.created_at,
         content: postpayload.content,
-        publicKey: uint8ArrayToString(message.publicKey),
+        public_key: uint8ArrayToString(message.public_key),
         file: postpayload.file
     }
     return post
@@ -83,20 +83,20 @@ export const toPost = (message: Message, postpayload: PostPayload) => {
 
 export const INFO_HASH_REGEX = /urn:btih:([a-zA-Z0-9]{40})/;
 
-export const prepareMessage = (payload: Payload, privateKey: Uint8Array, publicKey: Uint8Array) => {
+export const prepareMessage = (payload: Payload, private_key: Uint8Array, public_key: Uint8Array) => {
     // Add nonce if ever use proof of work
     const serializedPayload = encode(payload);
     const hash = window.sodium.crypto_generichash(window.sodium.crypto_generichash_BYTES, serializedPayload);
     console.log('hash', hash);
 
     // Sign the message
-    const signature = window.sodium.crypto_sign_detached(hash, privateKey)
+    const signature = window.sodium.crypto_sign_detached(hash, private_key)
     console.log('sig', signature);
 
     const message: Message = {
         serializedPayload,
         hash,
-        publicKey,
+        public_key,
         signature
     }
     const buffer = encode(message)

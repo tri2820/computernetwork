@@ -11,7 +11,7 @@ export default component$(() => {
   return (
     <div class="sticky top-0 z-10 flex flex-none  items-center border-b border-neutral-800 bg-neutral-900 px-4 py-2 text-neutral-500">
       <p class="line-clamp-1 flex-1 break-all text-sm">
-        Welcome, {globalContext.publicKey_string}
+        Welcome, {globalContext.public_key_string}
       </p>
 
       <Link href={isSettings ? "/" : "/settings"} class="group flex-none">
