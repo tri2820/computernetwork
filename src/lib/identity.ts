@@ -3,6 +3,7 @@ import { Message, Payload } from "~/me";
 
 // @ts-ignore
 import { KeyPair } from "libsodium-wrappers";
+import { hashOf } from "./utils";
 
 export class Identity {
     keyPair: KeyPair;
@@ -11,17 +12,12 @@ export class Identity {
     }
 
     sign(payload: Payload) {
+        console.log('sign payload', payload);
         // Add nonce if ever use proof of work
-        const serialized_payload = encode(payload);
-        const hash = window.sodium.crypto_generichash(window.sodium.crypto_generichash_BYTES, serialized_payload);
-        console.log('hash', hash);
-
-        // Sign the message
+        const hash = hashOf(payload);
         const signature = window.sodium.crypto_sign_detached(hash, this.keyPair.privateKey)
-        console.log('sig', signature);
-
         const message: Message = {
-            serialized_payload,
+            payload,
             hash,
             public_key: this.keyPair.publicKey,
             signature

@@ -13,13 +13,19 @@ import type {
   OnMessageType,
 } from "~/lib/t_computernetwork";
 import t_computernetwork from "~/lib/t_computernetwork";
-import { add, toPost, uint8ArrayToString } from "~/lib/utils";
+import { add, hashOf, notEmpty, toPost, uint8ArrayToString } from "~/lib/utils";
 import { GlobalContext } from "~/routes/layout";
 // @ts-ignore
 import idbKVStore from "idb-kv-store";
-import type { Payload, Message } from "~/me";
+import type {
+  Payload,
+  Message,
+  QueryPostResultPayload,
+  PostPayload,
+} from "~/me";
 import ParseTorrent from "parse-torrent";
 import { Identity } from "~/lib/identity";
+import { equal } from "uint8-util";
 
 const magnetURI =
   "magnet:?xt=urn:btih:3731410718f7f86e8b1b5a4fb0ee1419faa11ccd&dn=computernetwork.io&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
@@ -27,11 +33,29 @@ const magnetURI =
 export default component$(() => {
   const globalContext = useContext(GlobalContext);
 
-  const onExtendedHandshake: OnExtendedHandshakeType = $((_this, handshake) => {
-    console.log(_this, handshake);
-    // _this.send({
+  const store = $((messages: Message[]) => {
+    const changes = messages.reduce(
+      (prev, cur) => ({
+        ...prev,
+        [uint8ArrayToString(cur.hash)]: cur,
+      }),
+      {},
+    );
 
-    // })
+    globalContext.storage = noSerialize({
+      messages: {
+        ...globalContext.storage?.messages,
+        ...changes,
+      },
+    });
+  });
+
+  const onExtendedHandshake: OnExtendedHandshakeType = $((_this, handshake) => {
+    const payload: Payload = {
+      query_post: {},
+    };
+    const message = globalContext.identity!.sign(payload);
+    _this.send(message);
   });
 
   const onMessage: OnMessageType = $((_this, buf) => {
@@ -47,35 +71,51 @@ export default component$(() => {
       return;
     }
 
-    const isValid =
-      window.sodium.crypto_sign_verify_detached(
+    if (
+      !window.sodium.crypto_sign_verify_detached(
         message.signature,
         message.hash,
         message.public_key,
-      ) &&
-      window.sodium.crypto_generichash(
-        window.sodium.crypto_generichash_BYTES,
-        message.serialized_payload,
+      )
+    ) {
+      console.log("Not valid signature on hash");
+      return;
+    }
+
+    const hash = hashOf(message.payload);
+    if (!equal(hash, message.hash)) {
+      console.warn("Incorrect hash", hash, message.hash);
+      return;
+    }
+
+    // Store messages of important types
+    if (message.payload.post) {
+      store([message]);
+    }
+
+    if (message.payload.query_post) {
+      console.log("Peer asked for posts in my DB");
+      if (!globalContext.storage) return;
+      const postMessages = Object.values(globalContext.storage.messages).filter(
+        (m) => m.payload.post,
       );
+      if (postMessages.length == 0) return;
 
-    if (!isValid) {
-      console.warn("Cannot verify message");
-      return;
+      const query_post_result_payload: Payload = {
+        query_post_result: {
+          data: postMessages.slice(0, 100),
+        },
+      };
+      const query_post_result_message = globalContext.identity!.sign(
+        query_post_result_payload,
+      );
+      _this.send(query_post_result_message);
     }
 
-    console.log("Message", message);
-    let payload: Payload;
-    try {
-      payload = decode(message.serialized_payload);
-    } catch (e) {
-      console.warn("Error decode", e);
-      return;
-    }
-
-    if (payload.post) {
-      console.log(payload);
-      const newPost = toPost(message, payload.post);
-      globalContext.posts = [newPost, ...(globalContext.posts ?? [])];
+    if (message.payload.query_post_result) {
+      if (message.payload.query_post_result.data) {
+        store(message.payload.query_post_result.data);
+      }
     }
   });
 
@@ -92,9 +132,9 @@ export default component$(() => {
       identity.keyPair.publicKey,
     );
 
-    const TORRENTS_METADATA = new idbKVStore("TORRENTS_METADATA");
-    globalContext.TORRENTS_METADATA = noSerialize(TORRENTS_METADATA);
-    TORRENTS_METADATA.iterator((err: any, cursor: any) => {
+    const table_torrent_metadata = new idbKVStore("table_torrent_metadata");
+    globalContext.table_torrent_metadata = noSerialize(table_torrent_metadata);
+    table_torrent_metadata.iterator((err: any, cursor: any) => {
       if (err) throw err;
       if (cursor) {
         const torrentFile = cursor.value;

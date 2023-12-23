@@ -4,19 +4,20 @@ import { Message, Post, PostPayload } from "~/me";
 // @ts-ignore
 import idbChunkStore from "idb-chunk-store";
 import type { Instance as ParseTorrentInstance } from "parse-torrent";
+import { encode } from "cbor-x";
 
 export const uint8ArrayToString = (arr: Uint8Array) => {
     return Buffer.from(arr).toString('base64')
 }
 
-const bindMetadataStore = (t: Torrent, TORRENTS_METADATA: any) => {
+const bindMetadataStore = (t: Torrent, table_torrent_metadata: any) => {
     t.on("metadata", async () => {
-        TORRENTS_METADATA.add(t.infoHash, t.torrentFile);
+        table_torrent_metadata.add(t.infoHash, t.torrentFile);
         console.log(`Added`, t.infoHash);
     });
 }
 
-export const seed = (input: string | string[] | File | File[] | FileList | Buffer | Buffer[], webtorrent: Instance, TORRENTS_METADATA?: any) => {
+export const seed = (input: string | string[] | File | File[] | FileList | Buffer | Buffer[], webtorrent: Instance, table_torrent_metadata?: any) => {
     let torrent: Torrent | undefined;
     const torrentAwait = new Promise<Torrent | undefined>((resolve, reject) => {
         try {
@@ -25,8 +26,8 @@ export const seed = (input: string | string[] | File | File[] | FileList | Buffe
             }, (t) => {
                 resolve(t)
             });
-            if (TORRENTS_METADATA) {
-                bindMetadataStore(torrent, TORRENTS_METADATA)
+            if (table_torrent_metadata) {
+                bindMetadataStore(torrent, table_torrent_metadata)
             }
         } catch {
             reject()
@@ -42,7 +43,7 @@ export const seed = (input: string | string[] | File | File[] | FileList | Buffe
 
 
 export const add = (input: string | File | Buffer | ParseTorrentInstance, webtorrent: Instance,
-    TORRENTS_METADATA?: any
+    table_torrent_metadata?: any
 ) => {
     let torrent: Torrent | undefined;
     const torrentAwait = new Promise<Torrent | undefined>((resolve, reject) => {
@@ -52,8 +53,8 @@ export const add = (input: string | File | Buffer | ParseTorrentInstance, webtor
             }, (t) => {
                 resolve(t)
             });
-            if (TORRENTS_METADATA) {
-                bindMetadataStore(torrent, TORRENTS_METADATA)
+            if (table_torrent_metadata) {
+                bindMetadataStore(torrent, table_torrent_metadata)
             }
         } catch {
             reject()
@@ -91,4 +92,14 @@ export const MEDIA_EXTENSIONS = {
         '.avi', '.mp4', '.m4v', '.webm', '.mov', '.mkv', '.mpg', '.mpeg',
         '.ogv', '.webm', '.wmv', '.m2ts'],
     image: ['.gif', '.jpg', '.jpeg', '.png']
+}
+
+export function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
+    return value !== null && value !== undefined;
+}
+
+export function hashOf(x : any){
+    const serialized = encode(x);
+    const hash = window.sodium.crypto_generichash(window.sodium.crypto_generichash_BYTES, serialized);
+    return hash
 }

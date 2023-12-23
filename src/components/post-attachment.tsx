@@ -12,6 +12,7 @@ import type { Torrent } from "webtorrent";
 import { INFO_HASH_REGEX, MEDIA_EXTENSIONS, add } from "~/lib/utils";
 import type { FileInfo } from "~/me";
 import { GlobalContext } from "~/routes/layout";
+
 interface PostAttachmentProps {
   onDeleteClick$?: PropFunction<() => void>;
   file: FileInfo & { magnetURI?: string };
@@ -73,7 +74,7 @@ export default component$((props: PostAttachmentProps) => {
             const { torrentAwait } = add(
               magnetURI,
               globalContext.webtorrent!,
-              globalContext.TORRENTS_METADATA,
+              globalContext.table_torrent_metadata,
             );
             const _t = await torrentAwait;
             if (!_t) return;

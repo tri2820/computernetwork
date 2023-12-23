@@ -13,6 +13,7 @@ import TopBar from "~/components/top-bar";
 import type { GlobalContextType } from "~/me";
 // @ts-ignore
 import idbKVStore from "idb-kv-store";
+import { decode, encode } from "cbor-x";
 
 export const onGet: RequestHandler = async ({ cacheControl }) => {
   // Control caching for this request for best performance and to reduce hosting costs:
@@ -26,28 +27,28 @@ export const onGet: RequestHandler = async ({ cacheControl }) => {
 };
 
 export const GlobalContext = createContextId<GlobalContextType>("global");
-
+const MESSAGES_KEY = "MESSAGES";
 export default component$(() => {
   const globalContext = useStore<GlobalContextType>({});
   useContextProvider(GlobalContext, globalContext);
 
   useVisibleTask$(async () => {
-    const store = new idbKVStore("LOCAL_STATE");
-    globalContext.LOCAL_STATE = noSerialize(store);
+    const store = new idbKVStore("table_local_state");
+    globalContext.table_local_state = noSerialize(store);
 
-    const posts = await store.get("POSTS");
-    console.log("wake up get posts", posts);
-    if (posts) {
-      globalContext.posts = JSON.parse(posts);
+    const values = await store.get(MESSAGES_KEY);
+    console.log("wake up get messages", values);
+    if (values) {
+      const messages = decode(values);
+      globalContext.messages = noSerialize(messages);
+      console.log("globalContext.messages", globalContext.messages);
     }
   });
 
   useVisibleTask$(({ track }) => {
-    track(() => globalContext.posts);
-    globalContext.LOCAL_STATE.set(
-      "POSTS",
-      JSON.stringify(globalContext.posts ?? []),
-    );
+    track(() => globalContext.messages);
+    const values = encode(globalContext.messages);
+    globalContext.table_local_state.set(MESSAGES_KEY, values);
   });
 
   return (

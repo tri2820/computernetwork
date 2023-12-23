@@ -42,16 +42,19 @@ export type PostPayload = {
 }
 
 export type QueryPostPayload = {
-    // no-op
+    // bloom filters of my posts
 }
+
+export type QueryPostResultPayload = Result<Message[]>
 
 export type Payload = OneOf<{
     post: PostPayload,
-    query_post: QueryPostPayload
+    query_post: QueryPostPayload,
+    query_post_result: QueryPostResultPayload,
 }>
 
 export type Message = {
-    serialized_payload: Buffer,
+    payload: Payload,
     hash: Uint8Array,
     public_key: Uint8Array,
     signature: Uint8Array
@@ -65,15 +68,22 @@ export type Post = {
     file?: FileThroughTorrent
 }
 
+
 export type GlobalContextType = {
     main_torrent?: NoSerialize<Torrent>,
     wires?: NoSerialize<Wire[]>,
     webtorrent?: NoSerialize<Instance>,
     identity?: NoSerialize<Identity>,
     public_key_string?: string,
-    posts?: Post[],
-    TORRENTS_METADATA?: NoSerialize<any>,
-    LOCAL_STATE?: NoSerialize<any>
+    storage?: NoSerialize<{
+        // Avoid __no_serialize__ tag
+        messages: {
+            [id: string]: Message
+        }
+    }>,
+    // Indexed DB tables
+    table_torrent_metadata?: NoSerialize<any>,
+    table_local_state?: NoSerialize<any>
 }
 
 export { }

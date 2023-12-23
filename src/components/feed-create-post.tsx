@@ -8,7 +8,7 @@ import {
 } from "@builder.io/qwik";
 
 import { LuFilePlus2 } from "@qwikest/icons/lucide";
-import { seed, toPost } from "~/lib/utils";
+import { seed, toPost, uint8ArrayToString } from "~/lib/utils";
 import type { FileThroughTorrent, Payload, Post } from "~/me";
 import { GlobalContext } from "~/routes/layout";
 import PostAttachment from "./post-attachment";
@@ -52,7 +52,7 @@ export default component$(() => {
       const { torrentAwait } = seed(
         file.value,
         globalContext.webtorrent,
-        globalContext.TORRENTS_METADATA,
+        globalContext.table_torrent_metadata,
       );
 
       const torrent = await torrentAwait;
@@ -76,11 +76,15 @@ export default component$(() => {
 
     (() => {
       const message = globalContext.identity?.sign(payload);
-
+      console.log("message", message);
       if (!message) return;
-
-      const newPost: Post = toPost(message, payload.post);
-      globalContext.posts = [newPost, ...(globalContext.posts ?? [])];
+      globalContext.storage = noSerialize({
+        messages: {
+          ...globalContext.storage?.messages,
+          [uint8ArrayToString(message.hash)]: message,
+        },
+      });
+      console.log("globalContext.messages", globalContext.storage);
 
       if (!globalContext.wires) {
         console.log("no wire to submit");

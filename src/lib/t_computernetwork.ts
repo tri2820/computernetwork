@@ -18,8 +18,9 @@ class t_computernetwork extends EventEmitter {
         this.wire = wire
     }
 
-    send(message: Message) {
-        const buffer = encode(message)
+    // TODO: Also possibly Payload for non-signed stuffs
+    send(input: Message) {
+        const buffer = encode(input)
         const peerSupportThisProtocol = this.wire.peerExtendedHandshake?.m?.t_computernetwork;
         if (!peerSupportThisProtocol) {
             console.log('skip sending to', this.wire.peerId);
