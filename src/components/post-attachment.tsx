@@ -73,7 +73,7 @@ export default component$((props: PostAttachmentProps) => {
             const { torrentAwait } = add(
               magnetURI,
               globalContext.webtorrent!,
-              globalContext.torrentsMetadata,
+              globalContext.TORRENTS_METADATA,
             );
             const _t = await torrentAwait;
             process(_t);

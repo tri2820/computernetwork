@@ -10,24 +10,26 @@ export const uint8ArrayToString = (arr: Uint8Array) => {
     return Buffer.from(arr).toString('base64')
 }
 
-const bindMetadataStore = (t: Torrent, torrentsMetadata: any) => {
+const bindMetadataStore = (t: Torrent, TORRENTS_METADATA: any) => {
     t.on("metadata", async () => {
         const metadata = await ParseTorrent(t.torrentFile);
-        torrentsMetadata.add(metadata.infoHash, metadata);
+        TORRENTS_METADATA.add(metadata.infoHash, metadata);
         console.log(`Added`, t.infoHash);
     });
 }
 
-export const seed = (input: string | string[] | File | File[] | FileList | Buffer | Buffer[], webtorrent: Instance, torrentsMetadata: any) => {
+export const seed = (input: string | string[] | File | File[] | FileList | Buffer | Buffer[], webtorrent: Instance, TORRENTS_METADATA?: any) => {
     let torrent: Torrent | undefined;
-    const torrentAwait = new Promise<Torrent>((resolve, reject) => {
+    const torrentAwait = new Promise<Torrent | undefined>((resolve, reject) => {
         try {
             torrent = webtorrent.seed(input, {
                 store: idbChunkStore
             }, (t) => {
                 resolve(t)
             });
-            bindMetadataStore(torrent, torrentsMetadata)
+            if (TORRENTS_METADATA) {
+                bindMetadataStore(torrent, TORRENTS_METADATA)
+            }
         } catch {
             reject()
         }
@@ -42,18 +44,18 @@ export const seed = (input: string | string[] | File | File[] | FileList | Buffe
 
 
 export const add = (input: string | File | Buffer | ParseTorrent.Instance, webtorrent: Instance, 
-    torrentsMetadata?: any
+    TORRENTS_METADATA?: any
     ) => {
     let torrent: Torrent | undefined;
-    const torrentAwait = new Promise<Torrent>((resolve, reject) => {
+    const torrentAwait = new Promise<Torrent | undefined>((resolve, reject) => {
         try {
             torrent = webtorrent.add(input, {
                 store: idbChunkStore
             }, (t) => {
                 resolve(t)
             });
-            if (torrentsMetadata) {
-                bindMetadataStore(torrent, torrentsMetadata)
+            if (TORRENTS_METADATA) {
+                bindMetadataStore(torrent, TORRENTS_METADATA)
             }
         } catch {
             reject()

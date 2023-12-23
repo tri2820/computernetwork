@@ -1,25 +1,70 @@
 import {
+  $,
   component$,
   noSerialize,
   useContext,
   useVisibleTask$,
 } from "@builder.io/qwik";
-import { Buffer } from "buffer/";
+import { Buffer } from "buffer";
+import { decode } from "cbor-x";
 import _sodium from "libsodium-wrappers";
 import t_computernetwork from "~/lib/t_computernetwork";
-import { add, uint8ArrayToString } from "~/lib/utils";
+import { add, toPost, uint8ArrayToString } from "~/lib/utils";
 import { GlobalContext } from "~/routes/layout";
-
-// @ts-ignore
-
 // @ts-ignore
 import idbKVStore from "idb-kv-store";
+import type { Data, Message } from "~/me";
 
 const magnetURI =
   "magnet:?xt=urn:btih:3731410718f7f86e8b1b5a4fb0ee1419faa11ccd&dn=computernetwork.io&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
 
 export default component$(() => {
   const globalContext = useContext(GlobalContext);
+
+  const onMessage = $((buf: Buffer) => {
+    // Buffer looks like <length>:<sent_data> for some reason
+    const colonPosition = buf.findIndex((x) => x == 58);
+    if (colonPosition == -1) return;
+
+    let message: Message;
+    try {
+      message = decode(buf.subarray(colonPosition + 1));
+    } catch (e) {
+      console.warn("Error decode message", e);
+      return;
+    }
+
+    const isValid =
+      window.sodium.crypto_sign_verify_detached(
+        message.signature,
+        message.hash,
+        message.publicKey,
+      ) &&
+      window.sodium.crypto_generichash(
+        window.sodium.crypto_generichash_BYTES,
+        message.payload,
+      );
+
+    if (!isValid) {
+      console.warn("Cannot verify message");
+      return;
+    }
+
+    console.log("Message", message);
+    let data: Data;
+    try {
+      data = decode(message.payload);
+    } catch (e) {
+      console.warn("Error decode data", e);
+      return;
+    }
+
+    if (data.post) {
+      console.log(data);
+      const newPost = toPost(message, data.post);
+      globalContext.posts = [newPost, ...(globalContext.posts ?? [])];
+    }
+  });
 
   useVisibleTask$(async ({ track }) => {
     window.Buffer = Buffer;
@@ -30,14 +75,13 @@ export default component$(() => {
     const keyPair = window.sodium.crypto_sign_keypair();
     globalContext.privateKey = noSerialize(keyPair.privateKey);
     const publicKey = keyPair.publicKey;
-    const id = new Buffer(publicKey).subarray(0, 20);
+    const id = Buffer.from(publicKey).subarray(0, 20);
     globalContext.publicKey = noSerialize(publicKey);
     globalContext.publicKey_string = uint8ArrayToString(publicKey);
 
-    const torrentsMetadata = new idbKVStore("torrentsMetadata");
-    globalContext.torrentsMetadata = noSerialize(torrentsMetadata);
-
-    torrentsMetadata.iterator((err: any, cursor: any) => {
+    const TORRENTS_METADATA = new idbKVStore("TORRENTS_METADATA");
+    globalContext.TORRENTS_METADATA = noSerialize(TORRENTS_METADATA);
+    TORRENTS_METADATA.iterator((err: any, cursor: any) => {
       if (err) throw err;
       if (cursor) {
         const metadata = cursor.value;
@@ -65,7 +109,7 @@ export default component$(() => {
     }
 
     torrent.on("wire", (wire) => {
-      wire.use(t_computernetwork(globalContext));
+      wire.use(t_computernetwork(publicKey, onMessage));
     });
 
     setInterval(() => {

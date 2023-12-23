@@ -18,6 +18,7 @@ export default component$(() => {
   const content = useSignal<string>();
   const file = useSignal<NoSerialize<File>>();
   const globalContext = useContext(GlobalContext);
+
   const attachmentDelete = $(() => {
     file.value = undefined;
   });
@@ -51,7 +52,7 @@ export default component$(() => {
       const { torrentAwait } = seed(
         file.value,
         globalContext.webtorrent,
-        globalContext.torrentsMetadata,
+        globalContext.TORRENTS_METADATA,
       );
 
       const torrent = await torrentAwait;

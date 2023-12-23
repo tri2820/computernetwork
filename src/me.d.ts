@@ -1,9 +1,7 @@
 import type { NoSerialize, Signal } from '@builder.io/qwik';
 import type { Instance, Torrent, WebTorrent } from '@types/webtorrent'
 import type { Wire } from 'bittorrent-protocol';
-import type { Buffer } from 'buffer/';
 import type _sodium from "libsodium-wrappers";
-
 
 declare global {
     interface Window {
@@ -42,12 +40,13 @@ export type DataPost = {
     created_at: number,
 }
 export type Data = OneOf<{
-    post: DataPost
+    post: DataPost,
+    somethingelse: any
 }
 >
 
 export type Message = {
-    payload: window.Buffer,
+    payload: Buffer,
     hash: Uint8Array,
     publicKey: Uint8Array,
     signature: Uint8Array
@@ -69,7 +68,8 @@ export type GlobalContextType = {
     publicKey?: NoSerialize<Uint8Array>,
     publicKey_string?: string,
     posts?: Post[],
-    torrentsMetadata: NoSerialize<any>
+    TORRENTS_METADATA?: NoSerialize<any>,
+    LOCAL_STATE?: NoSerialize<any>
 }
 
 export { }

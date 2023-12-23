@@ -1,9 +1,7 @@
 import { component$, useContext } from "@builder.io/qwik";
-import { LuFilePlus2 } from "@qwikest/icons/lucide";
-import FeedCard from "./feed-card";
-import RandomAvatar from "./random-avatar";
-import FeedCreatePost from "./feed-create-post";
 import { GlobalContext } from "~/routes/layout";
+import FeedCard from "./feed-card";
+import FeedCreatePost from "./feed-create-post";
 
 export default component$(() => {
   const globalContext = useContext(GlobalContext);

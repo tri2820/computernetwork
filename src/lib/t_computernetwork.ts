@@ -1,31 +1,26 @@
 import { Wire } from 'bittorrent-protocol';
-import { decode, encode } from 'cbor-x';
 import { EventEmitter } from 'events';
-import { Data, GlobalContextType, Message, Post } from '~/me';
-import { hash, arr2text, concat } from "uint8-util";
-import { toPost, uint8ArrayToString } from './utils';
-
-
+import { QRL } from '@builder.io/qwik';
 
 const NAME = 't_computernetwork';
-export default (globalContext: GlobalContextType) => class t_computernetwork extends EventEmitter {
+export type OnMessageType = QRL<(buf: Buffer) => void>;
+export default (publicKey: Uint8Array, _onMessage: OnMessageType) => class t_computernetwork extends EventEmitter {
     static {
         this.prototype.name = NAME;
     }
     name: string;
     wire: Wire;
-    globalContext: GlobalContextType;
-
+    _onMessage: OnMessageType;
 
     constructor(wire: Wire) {
         super()
         this.name = NAME
         this.wire = wire
-        this.globalContext = globalContext
         this.wire.extendedHandshake = {
             ...this.wire.extendedHandshake,
-            publicKey: this.globalContext.publicKey
+            publicKey
         }
+        this._onMessage = _onMessage;
     }
 
     onHandshake(infoHash: string, peerId: string, extensions: { [name: string]: boolean; }) {
@@ -38,49 +33,7 @@ export default (globalContext: GlobalContextType) => class t_computernetwork ext
 
 
     onMessage(buf: Buffer) {
-        // Buffer looks like <length>:<sent_data> for some reason
-        const colonPosition = buf.findIndex(x => x == 58);
-        if (colonPosition == -1) return;
-
-        let message: Message;
-        try {
-            message = decode(buf.subarray(colonPosition + 1));
-        } catch (e) {
-            console.warn('Error decode message', e);
-            return;
-        }
-
-        if (!message.signature || !message.hash || !message.publicKey || !message.payload) {
-            console.warn('Receive invalid message, missing field(s)');
-            return;
-        }
-
-        const isValid =
-            window.sodium.crypto_sign_verify_detached(message.signature, message.hash, message.publicKey)
-            && window.sodium.crypto_generichash(window.sodium.crypto_generichash_BYTES, message.payload);
-
-        if (!isValid) {
-            console.warn('Cannot verify message');
-            return;
-        }
-
-        console.log('Message', message);
-        let data: Data;
-        try {
-            data = decode(message.payload);
-        } catch (e) {
-            console.warn('Error decode data', e);
-            return;
-        }
-
-        // TODO: cache message
-
-        if (data.post) {
-            console.log(data);
-            const newPost = toPost(message, data.post)
-            this.globalContext.posts = [newPost, ...(this.globalContext.posts ?? [])]
-        }
-
+        this._onMessage(buf);
     }
 
     // Custom methods
