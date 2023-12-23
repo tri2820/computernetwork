@@ -71,13 +71,17 @@ export default component$((props: PostAttachmentProps) => {
               return;
             }
 
+            loading.value = true;
             const { torrentAwait } = add(
               magnetURI,
               globalContext.webtorrent!,
               globalContext.table_torrent_metadata,
             );
             const _t = await torrentAwait;
-            if (!_t) return;
+            if (!_t) {
+              // TODO: load error
+              return;
+            }
 
             process(_t);
             const interval = setInterval(() => {
@@ -88,8 +92,6 @@ export default component$((props: PostAttachmentProps) => {
                 loading.value = false;
               }
             }, 1000);
-
-            loading.value = true;
           }}
           class="flex  w-full items-center space-x-2  bg-neutral-900 px-4 py-2 text-left hover:bg-neutral-800"
         >

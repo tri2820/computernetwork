@@ -84,7 +84,6 @@ export default component$(() => {
           [uint8ArrayToString(message.hash)]: message,
         },
       });
-      console.log("globalContext.messages", globalContext.storage);
 
       if (!globalContext.wires) {
         console.log("no wire to submit");

@@ -40,14 +40,13 @@ export default component$(() => {
     console.log("wake up get messages", values);
     if (values) {
       const messages = decode(values);
-      globalContext.messages = noSerialize(messages);
-      console.log("globalContext.messages", globalContext.messages);
+      globalContext.storage = noSerialize(messages);
     }
   });
 
   useVisibleTask$(({ track }) => {
-    track(() => globalContext.messages);
-    const values = encode(globalContext.messages);
+    track(() => globalContext.storage);
+    const values = encode(globalContext.storage);
     globalContext.table_local_state.set(MESSAGES_KEY, values);
   });
 

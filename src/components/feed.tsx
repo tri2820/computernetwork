@@ -15,7 +15,7 @@ export default component$(() => {
         return post;
       })
       .filter(notEmpty)
-      .sort((a, b) => a.created_at - b.created_at);
+      .sort((a, b) => b.created_at - a.created_at);
     return _posts;
   });
 
