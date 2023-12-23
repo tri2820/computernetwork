@@ -42,7 +42,7 @@ export default component$(() => {
       ) &&
       window.sodium.crypto_generichash(
         window.sodium.crypto_generichash_BYTES,
-        message.serializedPayload,
+        message.serialized_payload,
       );
 
     if (!isValid) {
@@ -53,7 +53,7 @@ export default component$(() => {
     console.log("Message", message);
     let payload: Payload;
     try {
-      payload = decode(message.serializedPayload);
+      payload = decode(message.serialized_payload);
     } catch (e) {
       console.warn("Error decode", e);
       return;

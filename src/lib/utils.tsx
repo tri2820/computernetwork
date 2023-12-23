@@ -85,8 +85,8 @@ export const INFO_HASH_REGEX = /urn:btih:([a-zA-Z0-9]{40})/;
 
 export const prepareMessage = (payload: Payload, private_key: Uint8Array, public_key: Uint8Array) => {
     // Add nonce if ever use proof of work
-    const serializedPayload = encode(payload);
-    const hash = window.sodium.crypto_generichash(window.sodium.crypto_generichash_BYTES, serializedPayload);
+    const serialized_payload = encode(payload);
+    const hash = window.sodium.crypto_generichash(window.sodium.crypto_generichash_BYTES, serialized_payload);
     console.log('hash', hash);
 
     // Sign the message
@@ -94,7 +94,7 @@ export const prepareMessage = (payload: Payload, private_key: Uint8Array, public
     console.log('sig', signature);
 
     const message: Message = {
-        serializedPayload,
+        serialized_payload,
         hash,
         public_key,
         signature

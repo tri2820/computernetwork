@@ -50,7 +50,7 @@ export type Payload = OneOf<{
 }>
 
 export type Message = {
-    serializedPayload: Buffer,
+    serialized_payload: Buffer,
     hash: Uint8Array,
     public_key: Uint8Array,
     signature: Uint8Array
