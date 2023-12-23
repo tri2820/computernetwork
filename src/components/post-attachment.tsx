@@ -76,6 +76,8 @@ export default component$((props: PostAttachmentProps) => {
               globalContext.TORRENTS_METADATA,
             );
             const _t = await torrentAwait;
+            if (!_t) return;
+
             process(_t);
             const interval = setInterval(() => {
               console.log(_t, _t.downloaded, _t.progress);
