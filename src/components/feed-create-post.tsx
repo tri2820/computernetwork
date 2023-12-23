@@ -99,8 +99,8 @@ export default component$(() => {
   });
 
   return (
-    <div class="flex space-x-4 p-4">
-      <div class="flex-none">
+    <div class="flex space-x-4 px-4 pb-4">
+      <div class="flex-none pt-8">
         <RandomAvatar />
       </div>
 
@@ -108,7 +108,10 @@ export default component$(() => {
         <textarea
           name="content"
           bind:value={content}
-          class="h-24 w-full resize-none border-b border-neutral-900 bg-transparent text-xl outline-none ring-transparent
+          class="h-32 w-full resize-none border-b border-neutral-900  bg-transparent pt-8
+        text-xl
+        outline-none
+        ring-transparent
         placeholder:text-neutral-500
         "
           placeholder="What's on your mind?"
