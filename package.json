@@ -58,6 +58,7 @@
     "idb-kv-store": "^4.5.0",
     "libsodium-wrappers": "^0.7.13",
     "parse-torrent": "^11.0.14",
+    "posthog-js": "^1.96.1",
     "uuid": "^9.0.1"
   }
 }

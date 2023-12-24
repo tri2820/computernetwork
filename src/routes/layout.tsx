@@ -14,6 +14,7 @@ import type { GlobalContextType } from "~/me";
 // @ts-ignore
 import idbKVStore from "idb-kv-store";
 import { decode, encode } from "cbor-x";
+import posthog from "posthog-js";
 
 export const onGet: RequestHandler = async ({ cacheControl }) => {
   // Control caching for this request for best performance and to reduce hosting costs:
@@ -31,6 +32,12 @@ const MESSAGES_KEY = "MESSAGES";
 export default component$(() => {
   const globalContext = useStore<GlobalContextType>({});
   useContextProvider(GlobalContext, globalContext);
+
+  useVisibleTask$(() => {
+    posthog.init("phc_zxfbWru5VSVpSu7yN667GZRXAhDYtkSYGbpqI6KNevp", {
+      api_host: "https://app.posthog.com",
+    });
+  });
 
   useVisibleTask$(async () => {
     const store = new idbKVStore("table_local_state");
