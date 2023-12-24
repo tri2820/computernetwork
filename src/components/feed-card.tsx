@@ -8,7 +8,7 @@ export default component$(({ post }: { post: Post }) => {
   return (
     <div class="space-y-3 p-4">
       <div class="flex flex-row items-center space-x-2">
-        <RandomAvatar />
+        <RandomAvatar name={post.public_key} />
         <div>
           <p class="line-clamp-1 break-all font-bold">{post.public_key}</p>
           <p class="text-xs text-neutral-400">

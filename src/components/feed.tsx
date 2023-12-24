@@ -20,7 +20,7 @@ export default component$(() => {
   });
 
   return (
-    <div class="w-full flex-1 divide-y  divide-neutral-900 border-x border-neutral-900 md:w-[600px]">
+    <div class="w-full flex-1 divide-y  divide-neutral-900 border-neutral-900 md:w-[600px] md:border-x">
       <FeedCreatePost />
       {posts.value.map((post) => (
         <FeedCard key={post.id} post={post} />

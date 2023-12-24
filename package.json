@@ -50,6 +50,7 @@
     "vite-tsconfig-paths": "^4.2.1"
   },
   "dependencies": {
+    "@boringer-avatars/qwik": "^0.2.1",
     "@qwikest/icons": "^0.0.13",
     "bittorrent-protocol": "^4.1.11",
     "cbor-x": "^1.5.6",

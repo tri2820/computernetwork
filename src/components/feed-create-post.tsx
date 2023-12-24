@@ -101,7 +101,7 @@ export default component$(() => {
   return (
     <div class="flex space-x-4 px-4 pb-4">
       <div class="flex-none pt-8">
-        <RandomAvatar />
+        <RandomAvatar name={globalContext.public_key_string!} />
       </div>
 
       <div class="ml-2 flex-1 space-y-2">
