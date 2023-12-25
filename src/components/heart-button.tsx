@@ -33,6 +33,8 @@ export default component$(({ onClick, count, hearted }: HeartButtonProps) => {
     });
 
     animation.value = noSerialize(anim);
+    // Animation has 86 frames in total
+    animation.value.goToAndStop(86, true)
   });
 
   const handleButtonClicked = $(() => {
