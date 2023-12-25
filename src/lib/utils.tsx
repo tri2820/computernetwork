@@ -1,5 +1,5 @@
 import { Instance, Torrent } from "webtorrent";
-import { GlobalContextType, Message, Post, PostPayload, Result } from "~/app";
+import { GlobalContextType, Message, Post, PostData, Result } from "~/app";
 
 
 import { Buffer } from "buffer";
@@ -77,13 +77,13 @@ export const add = (input: string | File | Buffer | ParseTorrentInstance, webtor
 }
 
 
-export const toPost = (message: Message, postpayload: PostPayload) => {
+export const toPost = (message: Message, postdata: PostData) => {
     const post: Post = {
         id: uint8ArrayToString(message.hash),
-        created_at: message.created_at,
-        content: postpayload.content,
-        public_key: uint8ArrayToString(message.public_key),
-        file: postpayload.file,
+        created_at: message.payload.created_at,
+        content: postdata.content,
+        public_key: uint8ArrayToString(message.payload.public_key),
+        file: postdata.file,
     }
     return post
 }
@@ -188,7 +188,7 @@ export const addMessagesToStorage = (globalContext: GlobalContextType, new_messa
     const uniqueHashes: any = {}
     const uniqueReacts: any = {}
     let messages = [...(globalContext.storage?.messages ?? []), ...new_messages]
-        .sort((a, b) => b.created_at - a.created_at)
+        .sort((a, b) => b.payload.created_at - a.payload.created_at)
         .map(m => {
             const id = uint8ArrayToString(m.hash);
             if (uniqueHashes[id]) return;
@@ -197,9 +197,9 @@ export const addMessagesToStorage = (globalContext: GlobalContextType, new_messa
         })
         .filter(notEmpty)
         .map(m => {
-            if (!m.payload.react) return m;
+            if (!m.payload.data.react) return m;
             // Only store one react message per user
-            const id = `${uint8ArrayToString(m.public_key)}-${uint8ArrayToString(m.payload.react.for_message_hash)}`;
+            const id = `${uint8ArrayToString(m.payload.public_key)}-${uint8ArrayToString(m.payload.data.react.for_message_hash)}`;
             if (uniqueReacts[id]) {
                 return;
             }
@@ -208,8 +208,8 @@ export const addMessagesToStorage = (globalContext: GlobalContextType, new_messa
         })
         .filter(notEmpty)
         .map(m => {
-            if (!m.payload.react) return m;
-            if (m.payload.react.state == 'neutral') return;
+            if (!m.payload.data.react) return m;
+            if (m.payload.data.react.state == 'neutral') return;
             return m;
         })
         .filter(notEmpty);

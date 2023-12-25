@@ -10,8 +10,8 @@ export default component$(() => {
     if (!globalContext.storage) return [];
     const _posts = globalContext.storage.messages
       .map((m) => {
-        if (!m.payload.post) return null;
-        const post = toPost(m, m.payload.post);
+        if (!m.payload.data.post) return null;
+        const post = toPost(m, m.payload.data.post);
         return post;
       })
       .filter(notEmpty)

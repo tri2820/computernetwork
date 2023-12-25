@@ -37,37 +37,40 @@ export type FileThroughTorrent = FileInfo & {
     magnetURI: string,
 }
 
-export type PostPayload = {
+export type PostData = {
     file?: FileThroughTorrent,
     content: string,
 }
 
-export type QueryPostPayload = {
+export type QueryPostData = {
     // bloom filters of my posts
 }
 
 export type Hash = Uint8Array;
 
-export type ReactPayload = {
+export type ReactData = {
     state: 'neutral' | 'hearted',
-    for_message_hash: Hash
+    for_message_hash: Hash,
 }
 
-export type QueryPostResultPayload = Result<Message[]>
+export type QueryPostResultData = Result<Message[]>
 
-export type Payload = OneOf<{
-    post: PostPayload,
-    query_post: QueryPostPayload,
-    query_post_result: QueryPostResultPayload,
-    react: ReactPayload
+export type Data = OneOf<{
+    post: PostData,
+    query_post: QueryPostData,
+    query_post_result: QueryPostResultData,
+    react: ReactData
 }>
+export type Payload = {
+    public_key: Uint8Array,
+    created_at: number,
+    data: Data
+}
 
 export type Message = {
     payload: Payload,
     hash: Hash,
-    public_key: Uint8Array,
-    signature: Uint8Array,
-    created_at: number,
+    signature: Uint8Array
 }
 
 export type Post = {

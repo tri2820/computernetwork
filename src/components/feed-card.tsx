@@ -1,11 +1,10 @@
 import { $, component$, useComputed$, useContext } from "@builder.io/qwik";
-import type { Payload, Post } from "~/app";
+import type { Data, Post } from "~/app";
 import HeartButton from "~/components/heart-button";
 import {
   addMessagesToStorage,
   stringToUInt8Array,
   ts_unix2js,
-  ts_unix_now,
   uint8ArrayToString,
   uint8equal
 } from "~/lib/utils";
@@ -18,9 +17,9 @@ export default component$(({ post }: { post: Post }) => {
   const count = useComputed$(() => {
     if (!globalContext.storage) return 0;
     const c = globalContext.storage.messages.filter(m =>
-      m.payload.react
-      && m.payload.react.state == 'hearted'
-      && uint8ArrayToString(m.payload.react.for_message_hash) == post.id
+      m.payload.data.react
+      && m.payload.data.react.state == 'hearted'
+      && uint8ArrayToString(m.payload.data.react.for_message_hash) == post.id
     ).length;
     return c
   });
@@ -28,10 +27,10 @@ export default component$(({ post }: { post: Post }) => {
   const hearted = useComputed$(() => {
     if (!globalContext.storage) return false;
     const h = globalContext.storage.messages.some(m =>
-      m.payload.react
-      && m.payload.react.state == 'hearted'
-      && uint8ArrayToString(m.payload.react.for_message_hash) == post.id
-      && uint8equal(m.public_key, globalContext.storage!.identity.keyPair.publicKey)
+      m.payload.data.react
+      && m.payload.data.react.state == 'hearted'
+      && uint8ArrayToString(m.payload.data.react.for_message_hash) == post.id
+      && uint8equal(m.payload.public_key, globalContext.storage!.identity.keyPair.publicKey)
     )
     return h
   });
@@ -39,14 +38,14 @@ export default component$(({ post }: { post: Post }) => {
   const onHearted = $(async () => {
     const newHearted = !hearted.value;
 
-    const payload: Payload = {
+    const data: Data = {
       react: {
         state: newHearted ? "hearted" : "neutral",
         for_message_hash: stringToUInt8Array(post.id)
       },
     };
     console.log('globalContext.storage', globalContext.storage);
-    const message = await globalContext.storage!.identity.sign(payload);
+    const message = await globalContext.storage!.identity.sign(data);
     addMessagesToStorage(globalContext, [message]);
 
     if (!globalContext.wires) {

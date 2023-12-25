@@ -25,6 +25,7 @@ import { GlobalContext } from "~/routes/layout";
 import idbKVStore from "idb-kv-store";
 import ParseTorrent from "parse-torrent";
 import type {
+  Data,
   Message,
   Payload,
   Storage
@@ -39,10 +40,10 @@ export default component$(() => {
   const globalContext = useContext(GlobalContext);
 
   const onExtendedHandshake: OnExtendedHandshakeType = $(async (_this, handshake) => {
-    const payload: Payload = {
+    const data: Data = {
       query_post: {},
     };
-    const message = await globalContext.storage!.identity!.sign(payload);
+    const message = await globalContext.storage!.identity!.sign(data);
     _this.send(message);
   });
 
@@ -60,15 +61,20 @@ export default component$(() => {
     }
 
     if (
-      !window.sodium.crypto_sign_verify_detached(
-        message.signature,
-        message.hash,
-        message.public_key,
-      )
+      message.payload.data.post || message.payload.data.react
     ) {
-      console.log("Not valid signature on hash");
-      return;
+      if (
+        !window.sodium.crypto_sign_verify_detached(
+          message.signature,
+          message.hash,
+          message.payload.public_key,
+        )
+      ) {
+        console.log("Not valid signature on hash");
+        return;
+      }
     }
+
 
     const hash = hashOf(message.payload);
     if (!uint8equal(hash, message.hash)) {
@@ -77,32 +83,32 @@ export default component$(() => {
     }
 
     // Store messages of important types
-    if (message.payload.post) {
+    if (message.payload.data.post || message.payload.data.react) {
       addMessagesToStorage(globalContext, [message]);
     }
 
-    if (message.payload.query_post) {
+    if (message.payload.data.query_post) {
       console.log("Peer asked for posts in my DB");
       if (!globalContext.storage) return;
       const postMessages = globalContext.storage.messages.filter(
-        (m) => m.payload.post,
+        (m) => m.payload.data.post,
       );
       if (postMessages.length == 0) return;
 
-      const query_post_result_payload: Payload = {
+      const query_post_result_data: Data = {
         query_post_result: {
           data: postMessages.slice(0, 100),
         },
       };
       const query_post_result_message = await globalContext.storage!.identity!.sign(
-        query_post_result_payload,
+        query_post_result_data,
       );
       _this.send(query_post_result_message);
     }
 
-    if (message.payload.query_post_result) {
-      if (message.payload.query_post_result.data) {
-        addMessagesToStorage(globalContext, message.payload.query_post_result.data);
+    if (message.payload.data.query_post_result) {
+      if (message.payload.data.query_post_result.data) {
+        addMessagesToStorage(globalContext, message.payload.data.query_post_result.data);
       }
     }
   });

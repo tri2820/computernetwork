@@ -43,7 +43,7 @@ export default component$((props: PostAttachmentProps) => {
   });
 
   return (
-    <div class="group relative overflow-hidden">
+    <div class="group relative">
       <div class="overflow-hidden rounded-xl border border-neutral-800">
         <button
           onClick$={async () => {

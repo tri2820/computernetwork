@@ -51,7 +51,7 @@ export default component$(({ onClick, count, hearted }: HeartButtonProps) => {
       <div class="relative">
         <HiHeartOutline
           class={
-            "peer h-5 w-5 cursor-pointer text-neutral-500 transition hover:text-white" +
+            "peer h-6 w-6 cursor-pointer text-neutral-500 transition hover:text-white" +
             tif(hearted.value, "opacity-0") +
             tif(!hearted.value && clicked.value, "animate-wiggle")
           }
@@ -60,7 +60,7 @@ export default component$(({ onClick, count, hearted }: HeartButtonProps) => {
         <div
           id={elId.value}
           class={
-            "pointer-events-none absolute left-0 top-0 ml-0.5 mt-[1px] h-36 w-36 -translate-x-16 -translate-y-16 transition peer-hover:brightness-150" +
+            "pointer-events-none absolute left-0 top-0 h-40 w-40 -translate-x-[68px] -translate-y-[69px] transition peer-hover:brightness-150" +
             tif(!hearted.value, "opacity-0")
           }
         />

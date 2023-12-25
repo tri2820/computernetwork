@@ -1,4 +1,4 @@
-import { Message, Payload } from "~/app";
+import { Data, Message, Payload } from "~/app";
 
 // @ts-ignore
 import { KeyPair } from "libsodium-wrappers";
@@ -10,8 +10,12 @@ export class Identity {
         this.keyPair = keyPair ?? window.sodium.crypto_sign_keypair();
     }
 
-    async sign(payload: Payload) {
-        console.log('sign payload', payload);
+    async sign(data: Data) {
+        const payload: Payload = {
+            public_key: this.keyPair.publicKey,
+            created_at: ts_unix_now(),
+            data
+        }
         // Add nonce if ever use proof of work
         const hash = hashOf(payload);
 
@@ -25,9 +29,7 @@ export class Identity {
         const message: Message = {
             payload,
             hash,
-            public_key: this.keyPair.publicKey,
             signature,
-            created_at: ts_unix_now()
         }
 
         return message

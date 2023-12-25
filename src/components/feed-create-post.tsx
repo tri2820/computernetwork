@@ -8,8 +8,8 @@ import {
 } from "@builder.io/qwik";
 
 import { LuFilePlus2 } from "@qwikest/icons/lucide";
-import type { FileThroughTorrent, Payload } from "~/app";
-import { addMessagesToStorage, seed, ts_unix_now } from "~/lib/utils";
+import type { Data, FileThroughTorrent } from "~/app";
+import { addMessagesToStorage, seed } from "~/lib/utils";
 import { GlobalContext } from "~/routes/layout";
 import PostAttachment from "./post-attachment";
 import RandomAvatar from "./random-avatar";
@@ -66,7 +66,7 @@ export default component$(() => {
       }
     }
 
-    const payload: Payload = {
+    const data: Data = {
       post: {
         file: _file,
         content: content.value.trim()
@@ -74,7 +74,7 @@ export default component$(() => {
     };
 
     (async () => {
-      const message = await globalContext.storage!.identity.sign(payload);
+      const message = await globalContext.storage!.identity.sign(data);
       addMessagesToStorage(globalContext, [message]);
 
       if (!globalContext.wires) {
