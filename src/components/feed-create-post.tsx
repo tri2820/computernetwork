@@ -69,7 +69,7 @@ export default component$(() => {
     const data: Data = {
       post: {
         file: _file,
-        content: content.value.trim()
+        content: content.value.trim(),
       },
     };
 
@@ -99,7 +99,7 @@ export default component$(() => {
       <div class="ml-2 flex-1 space-y-2">
         <textarea
           name="content"
-          bind: value={content}
+          bind:value={content}
           class="h-32 w-full resize-none border-b border-neutral-900  bg-transparent pt-8
         text-xl
         outline-none
