@@ -1,31 +1,31 @@
 # ComputerNetwork
-ComputerNetwork is a decentralized social network built on top of WebTorrent. It lets users establish browser-to-browser connections and share posts, files, etc., with each other.
+ComputerNetwork is a decentralized social network built on top of WebTorrent. It enables users to establish browser-to-browser connections to share posts, files, and more.
 
 ### How It Works
-- Files are stored inside Indexed DB.
-- Files are shared via WebTorrent.
-- Supports a variety of file types: jpeg, mp3, mp4, html, js, etc. (you name it).
-- A user's identity is a private key, randomly generated on the first visit.
-- Messages are signed using a private key to prove authenticity.
-- Nodes in the network keep each other updated by sharing messages with each other.
-- Can work not only over LAN but also over the Internet.
-- Can scale globally (?).
+- Files are stored inside IndexedDB.
+- Files are shared using WebTorrent.
+- Supports various file types: jpeg, mp3, mp4, html, js, etc.
+- A user's identity is created with a private key, randomly generated during their first visit.
+- Messages are authenticated by signing them with the user's private key.
+- Nodes in the network keep each other updated by exchanging messages.
+- Operates over both LAN and the Internet.
+- Scalable on a global level (?)
 
 Under the hood, ComputerNetwork uses its own protocol, which is a [Torrent BEP-10 extension](https://www.bittorrent.org/beps/bep_0010.html).
 
 ## How to Try It
-Visit https://computernetwork.io. If you are lucky, your node will be connected to strangers' nodes over the Internet. Enjoy exploring!
+To try ComputerNetwork, visit https://computernetwork.io. You should be able to see posts from peers over the Internet.
 
-However, if there are only a few active nodes in the network, or if your node is behind a NAT (Network Address Translation), your node might not be able to find other nodes over the Internet.
+Note: If there are few active nodes, or if your node is behind NAT (Network Address Translation), connections over the Internet may not be possible. In this case, try the local setup as described below.
 
-In those cases, you can still try ComputerNetwork _locally_ as follows:
-1. On your browser, visit https://computernetwork.io, this will be node A.
-2. Open an anonymous tab, visit https://computernetwork.io, this will be node B.
-3. Check how many peers are connected (at the bottom right), and if A has connected to B.
-4. If you see more than 0 peers, you can start sending/receiving messages.
+1. Visit https://computernetwork.io to start node A in your browser.
+2. Open an incognito tab, visit https://computernetwork.io for node B.
+3. Check the number of connected peers (bottom right); see if A connected to B.
+4. If A connected to B, begin sending/receiving messages.
 
 ## Development
 
+To start development, use the following commands:
 ```shell
 bun i
 bun dev
@@ -34,10 +34,12 @@ bun dev
 ## Production
 
 ### Host on Vercel
-Fork this repository. This project is ready to be deployed to Vercel. Then you can [deploy your site to Vercel](https://vercel.com/docs/concepts/deployments/overview) either via a Git provider integration or through the Vercel CLI.
+To deploy on Vercel:
+1. Fork this repository.
+2. Deploy your site to Vercel via a Git provider or Vercel CLI as detailed in [Vercel's deployment documentation](https://vercel.com/docs/concepts/deployments/overview).
 
 ### Self-hosted
-Run the app on your own server.
+To run the app on your own server, execute these commands:
 ```shell
 bun run build.types
 bun run lint
