@@ -14,13 +14,13 @@ export default component$(() => {
         Welcome, {globalContext.public_key_string}
       </p>
 
-      <Link href={isSettings ? "/" : "/settings"} class="group flex-none">
+      {/* <Link href={isSettings ? "/" : "/settings"} class="group flex-none">
         {isSettings ? (
           <LuChevronLeft class="h-4 w-4 transition-all group-hover:text-white" />
         ) : (
           <LuCog class="h-4 w-4 transition-all group-hover:text-white" />
         )}
-      </Link>
+      </Link> */}
     </div>
   );
 });

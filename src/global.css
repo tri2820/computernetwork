@@ -39,3 +39,7 @@ body {
   padding: 0;
   line-height: inherit;
 }
+
+div[id^="torrent-container-"] > * {
+  width: 100%
+}

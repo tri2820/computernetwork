@@ -9,7 +9,7 @@ import {
 import { LuLoader2, LuX } from "@qwikest/icons/lucide";
 import { v4 as uuidv4 } from "uuid";
 import type { Torrent } from "webtorrent";
-import { INFO_HASH_REGEX, MEDIA_EXTENSIONS, add } from "~/lib/utils";
+import { INFO_HASH_REGEX, MEDIA_EXTENSIONS, add, humanFileSize, tif } from "~/lib/utils";
 import type { FileInfo } from "~/app";
 import { GlobalContext } from "~/routes/layout";
 
@@ -20,30 +20,52 @@ interface PostAttachmentProps {
 
 export default component$((props: PostAttachmentProps) => {
   const globalContext = useContext(GlobalContext);
-  const appened = useSignal(false);
+  const processed = useSignal(false);
   const loading = useSignal(false);
   const open = useSignal(false);
-  // const containerId = useSignal(`container-${uuidv4()}`);
+  // const type = useSignal<'image' | 'video' | 'audio'>();
+  const containerId = useSignal(`torrent-container-${uuidv4()}`);
   const magnetURI = props.file.magnetURI;
   const infoHash = magnetURI?.match(INFO_HASH_REGEX)?.[1];
   const torrent = useSignal<NoSerialize<Torrent>>();
 
-  const imageRef = useSignal<HTMLMediaElement>();
+  // const imageRef = useSignal<HTMLMediaElement>();
+  // const videoRef = useSignal<HTMLMediaElement>();
 
   const process = $((t: Torrent) => {
-    appened.value = true;
-    t.files.forEach((file) => {
-      const isActuallyImage = MEDIA_EXTENSIONS.image.some((ext) =>
-        file.name.endsWith(ext),
-      );
-      if (!isActuallyImage) return;
-      file.renderTo(imageRef.value!);
-      open.value = true;
-    });
+    processed.value = true;
+    const f = t.files.at(0);
+    if (!f) return;
+
+    // (() => {
+    //   const isImage = MEDIA_EXTENSIONS.image.some((ext) =>
+    //     f.name.endsWith(ext),
+    //   );
+
+    //   if (isImage) {
+    //     type.value = 'image'
+    //     return;
+    //   }
+
+    //   const isVideo = MEDIA_EXTENSIONS.video.some((ext) =>
+    //     f.name.endsWith(ext),
+    //   );
+
+    //   if (isVideo) {
+    //     type.value = 'video'
+
+    //     return;
+    //   }
+    // })()
+
+    f.appendTo(
+      document.getElementById(containerId.value)!
+    )
+    open.value = true;
   });
 
   return (
-    <div class="group relative">
+    <div class="group relative ">
       <div class="overflow-hidden rounded-xl border border-neutral-800">
         <button
           onClick$={async () => {
@@ -65,7 +87,7 @@ export default component$((props: PostAttachmentProps) => {
               (t) => t.infoHash == infoHash,
             );
 
-            if (t && !appened.value) {
+            if (t && !processed.value) {
               torrent.value = noSerialize(t);
               process(t);
               return;
@@ -98,20 +120,21 @@ export default component$((props: PostAttachmentProps) => {
           <div class="flex-1">
             <p class="line-clamp-1 text-sm">{props.file.name}</p>
             <p class="text-xs text-neutral-500">
-              {props.file.type} • {props.file.size}
+              {props.file.type} • {humanFileSize(props.file.size)}
             </p>
           </div>
 
           {loading.value && <LuLoader2 class="w4 h-4 flex-none animate-spin" />}
         </button>
         <div
-          // id={containerId.value}
-          class="max-h-[600px] overflow-hidden "
+          class="max-h-[600px] overflow-hidden"
           style={{
             display: open.value ? "block" : "none",
           }}
+          id={containerId.value}
         >
-          <img ref={imageRef} class="w-full" />
+          {/* <img ref={imageRef} class={"w-full" + tif(type.value == 'image', '', 'hidden')} />
+          <video ref={videoRef} class={"w-full" + tif(type.value == 'video', '', 'hidden')} /> */}
         </div>
       </div>
 
