@@ -6,7 +6,7 @@ import {
   useVisibleTask$,
 } from "@builder.io/qwik";
 import { Buffer } from "buffer";
-import { decode } from "cbor-x";
+import { decode, encode } from "cbor-x";
 import _sodium from "libsodium-wrappers";
 import type {
   OnExtendedHandshakeType,
@@ -26,12 +26,14 @@ import idbKVStore from "idb-kv-store";
 import ParseTorrent from "parse-torrent";
 import type {
   Message,
-  Payload
+  Payload,
+  Storage
 } from "~/app";
 import { Identity } from "~/lib/identity";
 
 const magnetURI =
   "magnet:?xt=urn:btih:3731410718f7f86e8b1b5a4fb0ee1419faa11ccd&dn=computernetwork.io&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
+const STORAGE_KEY = "STORAGE";
 
 export default component$(() => {
   const globalContext = useContext(GlobalContext);
@@ -40,7 +42,7 @@ export default component$(() => {
     const payload: Payload = {
       query_post: {},
     };
-    const message = await globalContext.identity!.sign(payload);
+    const message = await globalContext.storage!.identity!.sign(payload);
     _this.send(message);
   });
 
@@ -92,7 +94,7 @@ export default component$(() => {
           data: postMessages.slice(0, 100),
         },
       };
-      const query_post_result_message = await globalContext.identity!.sign(
+      const query_post_result_message = await globalContext.storage!.identity!.sign(
         query_post_result_payload,
       );
       _this.send(query_post_result_message);
@@ -105,6 +107,13 @@ export default component$(() => {
     }
   });
 
+  useVisibleTask$(({ track }) => {
+    track(() => globalContext.storage);
+    const values = encode(globalContext.storage);
+    globalContext.table_local_state?.set(STORAGE_KEY, values);
+  });
+
+
   useVisibleTask$(async ({ track }) => {
     window.Buffer = Buffer;
 
@@ -114,11 +123,23 @@ export default component$(() => {
     await _sodium.ready;
     window.sodium = _sodium;
 
-    const identity = new Identity();
-    globalContext.identity = noSerialize(identity);
-    const id = Buffer.from(identity.keyPair.publicKey).subarray(0, 20);
+    const store = new idbKVStore("table_local_state");
+    globalContext.table_local_state = noSerialize(store);
+    const values = await store.get(STORAGE_KEY);
+    if (values) {
+      const storage: Storage = decode(values);
+      console.log('load storage', uint8ArrayToString(storage!.identity.keyPair.publicKey));
+      globalContext.storage = noSerialize(storage)
+    } else {
+      globalContext.storage = noSerialize({
+        messages: [],
+        identity: new Identity()
+      })
+    }
+
+    const id = Buffer.from(globalContext.storage!.identity.keyPair.publicKey).subarray(0, 20);
     globalContext.public_key_string = uint8ArrayToString(
-      identity.keyPair.publicKey,
+      globalContext.storage!.identity.keyPair.publicKey,
     );
 
     const table_torrent_metadata = new idbKVStore("table_torrent_metadata");
@@ -156,7 +177,7 @@ export default component$(() => {
     torrent.on("wire", (wire) => {
       wire.use(
         t_computernetwork({
-          public_key: identity.keyPair.publicKey,
+          public_key: globalContext.storage!.identity.keyPair.publicKey,
           onMessage,
           onExtendedHandshake,
         }),

@@ -10,11 +10,13 @@ import {
 import type { DocumentHead, RequestHandler } from "@builder.io/qwik-city";
 import WebtorrentService from "~/components/WebtorrentService";
 import TopBar from "~/components/top-bar";
-import type { GlobalContextType } from "~/app";
+import type { GlobalContextType, Storage } from "~/app";
 // @ts-ignore
 import idbKVStore from "idb-kv-store";
 import { decode, encode } from "cbor-x";
 import posthog from "posthog-js";
+import { Identity } from "~/lib/identity";
+import { uint8ArrayToString } from "~/lib/utils";
 
 export const onGet: RequestHandler = async ({ cacheControl }) => {
   // Control caching for this request for best performance and to reduce hosting costs:
@@ -28,7 +30,6 @@ export const onGet: RequestHandler = async ({ cacheControl }) => {
 };
 
 export const GlobalContext = createContextId<GlobalContextType>("global");
-const MESSAGES_KEY = "MESSAGES";
 export default component$(() => {
   const globalContext = useStore<GlobalContextType>({});
   useContextProvider(GlobalContext, globalContext);
@@ -37,23 +38,6 @@ export default component$(() => {
     posthog.init("phc_zxfbWru5VSVpSu7yN667GZRXAhDYtkSYGbpqI6KNevp", {
       api_host: "https://app.posthog.com",
     });
-  });
-
-  useVisibleTask$(async () => {
-    const store = new idbKVStore("table_local_state");
-    globalContext.table_local_state = noSerialize(store);
-
-    const values = await store.get(MESSAGES_KEY);
-    if (values) {
-      const messages = decode(values);
-      globalContext.storage = noSerialize(messages);
-    }
-  });
-
-  useVisibleTask$(({ track }) => {
-    track(() => globalContext.storage);
-    const values = encode(globalContext.storage);
-    globalContext.table_local_state.set(MESSAGES_KEY, values);
   });
 
   return (

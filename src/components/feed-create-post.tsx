@@ -74,7 +74,7 @@ export default component$(() => {
     };
 
     (async () => {
-      const message = await globalContext.identity!.sign(payload);
+      const message = await globalContext.storage!.identity.sign(payload);
       addMessagesToStorage(globalContext, [message]);
 
       if (!globalContext.wires) {

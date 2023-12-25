@@ -183,6 +183,8 @@ export const tif = (cond: boolean, classNamesTrue: string, classNamesFalse = "")
 
 
 export const addMessagesToStorage = (globalContext: GlobalContextType, new_messages: Message[]) => {
+    if (!globalContext.storage) return;
+
     const uniqueHashes: any = {}
     const uniqueReacts: any = {}
     let messages = [...(globalContext.storage?.messages ?? []), ...new_messages]

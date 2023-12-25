@@ -31,7 +31,7 @@ export default component$(({ post }: { post: Post }) => {
       m.payload.react
       && m.payload.react.state == 'hearted'
       && uint8ArrayToString(m.payload.react.for_message_hash) == post.id
-      && uint8equal(m.public_key, globalContext.identity!.keyPair.publicKey)
+      && uint8equal(m.public_key, globalContext.storage!.identity.keyPair.publicKey)
     )
     return h
   });
@@ -46,7 +46,7 @@ export default component$(({ post }: { post: Post }) => {
       },
     };
 
-    const message = await globalContext.identity!.sign(payload);
+    const message = await globalContext.storage!.identity.sign(payload);
     addMessagesToStorage(globalContext, [message]);
 
     if (!globalContext.wires) {

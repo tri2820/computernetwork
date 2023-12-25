@@ -78,18 +78,19 @@ export type Post = {
     created_at: number,
 }
 
+export type Storage = {
+    // Avoid __no_serialize__ tag
+    // TODO: proper DB
+    messages: Message[],
+    identity: Identity
+}
 
 export type GlobalContextType = {
     main_torrent?: NoSerialize<Torrent>,
     wires?: NoSerialize<Wire[]>,
     webtorrent?: NoSerialize<Instance>,
-    identity?: NoSerialize<Identity>,
     public_key_string?: string,
-    storage?: NoSerialize<{
-        // Avoid __no_serialize__ tag
-        // TODO: proper DB
-        messages: Message[]
-    }>,
+    storage?: NoSerialize<Storage>,
     // Indexed DB tables
     table_torrent_metadata?: NoSerialize<any>,
     table_local_state?: NoSerialize<any>
