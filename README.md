@@ -14,7 +14,7 @@ ComputerNetwork is a decentralized social network built on top of WebTorrent. It
 Under the hood, ComputerNetwork uses its own protocol, which is a [Torrent BEP-10 extension](https://www.bittorrent.org/beps/bep_0010.html).
 
 ## How to Try It
-To try ComputerNetwork, visit https://computernetwork.io. You should be able to see posts from peers over the Internet.
+To try ComputerNetwork, visit https://computernetwork.io. You should be able to see posts from peers over the Internet. Keep your browser tab alive so people could connect to it.
 
 Note: If there are few active nodes, or if your node is behind NAT (Network Address Translation), connections over the Internet may not be possible. In this case, try the local setup as described below.
 
@@ -47,3 +47,7 @@ bun run build.client
 bun run build.server.bun
 bun run serve
 ```
+
+## Inspirations
+- [WebTorrent](https://github.com/webtorrent/webtorrent)
+- [Nostr](https://github.com/nostr-protocol/nostr)
