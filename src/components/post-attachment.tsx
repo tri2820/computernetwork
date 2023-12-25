@@ -10,7 +10,7 @@ import { LuLoader2, LuX } from "@qwikest/icons/lucide";
 import { v4 as uuidv4 } from "uuid";
 import type { Torrent } from "webtorrent";
 import { INFO_HASH_REGEX, MEDIA_EXTENSIONS, add } from "~/lib/utils";
-import type { FileInfo } from "~/me";
+import type { FileInfo } from "~/app";
 import { GlobalContext } from "~/routes/layout";
 
 interface PostAttachmentProps {

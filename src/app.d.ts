@@ -8,8 +8,10 @@ declare global {
     interface Window {
         bodymovin: any;
         WebTorrent: WebTorrent;
-        Buffer: any
+        Buffer: any;
         sodium: typeof _sodium;
+        OpenTimestamps: any;
+        globalContext: GlobalContextType;
     }
 
 }
@@ -38,11 +40,17 @@ export type FileThroughTorrent = FileInfo & {
 export type PostPayload = {
     file?: FileThroughTorrent,
     content: string,
-    created_at: number,
 }
 
 export type QueryPostPayload = {
     // bloom filters of my posts
+}
+
+export type Hash = Uint8Array;
+
+export type ReactPayload = {
+    state: 'neutral' | 'hearted',
+    for_message_hash: Hash
 }
 
 export type QueryPostResultPayload = Result<Message[]>
@@ -51,21 +59,23 @@ export type Payload = OneOf<{
     post: PostPayload,
     query_post: QueryPostPayload,
     query_post_result: QueryPostResultPayload,
+    react: ReactPayload
 }>
 
 export type Message = {
     payload: Payload,
-    hash: Uint8Array,
+    hash: Hash,
     public_key: Uint8Array,
-    signature: Uint8Array
+    signature: Uint8Array,
+    created_at: number,
 }
 
 export type Post = {
     id: string,
     public_key: string,
     content: string,
+    file?: FileThroughTorrent,
     created_at: number,
-    file?: FileThroughTorrent
 }
 
 
@@ -77,9 +87,8 @@ export type GlobalContextType = {
     public_key_string?: string,
     storage?: NoSerialize<{
         // Avoid __no_serialize__ tag
-        messages: {
-            [id: string]: Message
-        }
+        // TODO: proper DB
+        messages: Message[]
     }>,
     // Indexed DB tables
     table_torrent_metadata?: NoSerialize<any>,

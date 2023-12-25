@@ -8,8 +8,8 @@ import {
 } from "@builder.io/qwik";
 
 import { LuFilePlus2 } from "@qwikest/icons/lucide";
-import { seed, toPost, uint8ArrayToString } from "~/lib/utils";
-import type { FileThroughTorrent, Payload, Post } from "~/me";
+import type { FileThroughTorrent, Payload } from "~/app";
+import { addMessagesToStorage, seed, ts_unix_now } from "~/lib/utils";
 import { GlobalContext } from "~/routes/layout";
 import PostAttachment from "./post-attachment";
 import RandomAvatar from "./random-avatar";
@@ -69,21 +69,13 @@ export default component$(() => {
     const payload: Payload = {
       post: {
         file: _file,
-        content: content.value.trim(),
-        created_at: new Date().getTime(),
+        content: content.value.trim()
       },
     };
 
-    (() => {
-      const message = globalContext.identity?.sign(payload);
-      console.log("message", message);
-      if (!message) return;
-      globalContext.storage = noSerialize({
-        messages: {
-          ...globalContext.storage?.messages,
-          [uint8ArrayToString(message.hash)]: message,
-        },
-      });
+    (async () => {
+      const message = await globalContext.identity!.sign(payload);
+      addMessagesToStorage(globalContext, [message]);
 
       if (!globalContext.wires) {
         console.log("no wire to submit");
@@ -107,7 +99,7 @@ export default component$(() => {
       <div class="ml-2 flex-1 space-y-2">
         <textarea
           name="content"
-          bind:value={content}
+          bind: value={content}
           class="h-32 w-full resize-none border-b border-neutral-900  bg-transparent pt-8
         text-xl
         outline-none

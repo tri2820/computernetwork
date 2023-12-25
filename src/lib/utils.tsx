@@ -1,14 +1,21 @@
 import { Instance, Torrent } from "webtorrent";
-import { Message, Post, PostPayload } from "~/me";
+import { GlobalContextType, Message, Post, PostPayload, Result } from "~/app";
 
+
+import { Buffer } from "buffer";
+import { encode } from "cbor-x";
+import { noSerialize } from "@builder.io/qwik";
 // @ts-ignore
 import idbChunkStore from "idb-chunk-store";
 import type { Instance as ParseTorrentInstance } from "parse-torrent";
-import { encode } from "cbor-x";
-import { Buffer } from "buffer";
+// const OpenTimestamps = require('opentimestamps');
 
 export const uint8ArrayToString = (arr: Uint8Array) => {
     return Buffer.from(arr).toString('base64')
+}
+
+export const stringToUInt8Array = (str: string): Uint8Array => {
+    return Buffer.from(str, 'base64')
 }
 
 const bindMetadataStore = (t: Torrent, table_torrent_metadata: any) => {
@@ -73,10 +80,10 @@ export const add = (input: string | File | Buffer | ParseTorrentInstance, webtor
 export const toPost = (message: Message, postpayload: PostPayload) => {
     const post: Post = {
         id: uint8ArrayToString(message.hash),
-        created_at: postpayload.created_at,
+        created_at: message.created_at,
         content: postpayload.content,
         public_key: uint8ArrayToString(message.public_key),
-        file: postpayload.file
+        file: postpayload.file,
     }
     return post
 }
@@ -99,11 +106,114 @@ export function notEmpty<TValue>(value: TValue | null | undefined): value is TVa
     return value !== null && value !== undefined;
 }
 
-export function hashOf(x : any){
+export function hashOf(x: any) {
     const serialized = encode(x);
     const hash = window.sodium.crypto_generichash(window.sodium.crypto_generichash_BYTES, serialized);
     return hash
 }
 
-export const equal = (first: Uint8Array, second: Uint8Array) =>
+export const uint8equal = (first: Uint8Array, second: Uint8Array) =>
     first.length === second.length && first.every((value, index) => value === second[index]);
+
+export const ts_stamp_now = async (hash: Buffer): Promise<Result<{
+    detached: any,
+    fileOts: any,
+    detachedOts: any
+}>> => {
+    const detached = window.OpenTimestamps.DetachedTimestampFile.fromHash(new window.OpenTimestamps.Ops.OpSHA256(), hash);
+    try {
+        await window.OpenTimestamps.stamp(detached);
+        const fileOts: Uint8Array = detached.serializeToBytes();
+        const detachedOts = window.OpenTimestamps.DetachedTimestampFile.deserialize(fileOts);
+        return {
+            data: {
+                detached,
+                fileOts,
+                detachedOts
+            }
+        }
+    } catch (err) {
+        return {
+            error: {
+                message: 'Cannot stamp'
+            }
+        }
+    }
+}
+
+// Note: Instantly verifying after stamping could return {} (pending)
+export const ts_verify = async ({
+    detached,
+    detachedOts
+}: {
+    detached: any,
+    detachedOts: any
+}): Promise<Result<{
+    verifyResult: any
+}>> => {
+    let options: any = {};
+    options.ignoreBitcoinNode = true;
+    options.timeout = 5000;
+
+    // console.log('debug ts_verify', detachedOts, detached, options);
+
+    try {
+        const verifyResult = await window.OpenTimestamps.verify(detachedOts, detached, options)
+        return {
+            data: {
+                verifyResult
+            }
+        }
+    } catch (e) {
+        console.log('e', e);
+        return {
+            error: {
+                message: 'Cannot verify timestamp'
+            }
+        }
+    }
+
+}
+
+export const ts_unix_now = () => Math.floor(new Date().getTime() / 1000)
+export const ts_unix2js = (unixts: number) => unixts * 1000
+export const tif = (cond: boolean, classNamesTrue: string, classNamesFalse = "") => {
+    return cond ? ` ${classNamesTrue} ` : ` ${classNamesFalse} `;
+};
+
+
+export const addMessagesToStorage = (globalContext: GlobalContextType, new_messages: Message[]) => {
+    const uniqueHashes: any = {}
+    const uniqueReacts: any = {}
+    let messages = [...(globalContext.storage?.messages ?? []), ...new_messages]
+        .sort((a, b) => b.created_at - a.created_at)
+        .map(m => {
+            const id = uint8ArrayToString(m.hash);
+            if (uniqueHashes[id]) return;
+            uniqueHashes[id] = true;
+            return m;
+        })
+        .filter(notEmpty)
+        .map(m => {
+            if (!m.payload.react) return m;
+            // Only store one react message per user
+            const id = `${uint8ArrayToString(m.public_key)}-${uint8ArrayToString(m.payload.react.for_message_hash)}`;
+            if (uniqueReacts[id]) {
+                return;
+            }
+            uniqueReacts[id] = true;
+            return m;
+        })
+        .filter(notEmpty)
+        .map(m => {
+            if (!m.payload.react) return m;
+            if (m.payload.react.state == 'neutral') return;
+            return m;
+        })
+        .filter(notEmpty);
+
+    globalContext.storage = noSerialize({
+        ...globalContext.storage,
+        messages,
+    });
+}

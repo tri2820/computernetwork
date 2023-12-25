@@ -10,7 +10,7 @@ import {
 import type { DocumentHead, RequestHandler } from "@builder.io/qwik-city";
 import WebtorrentService from "~/components/WebtorrentService";
 import TopBar from "~/components/top-bar";
-import type { GlobalContextType } from "~/me";
+import type { GlobalContextType } from "~/app";
 // @ts-ignore
 import idbKVStore from "idb-kv-store";
 import { decode, encode } from "cbor-x";
@@ -44,7 +44,6 @@ export default component$(() => {
     globalContext.table_local_state = noSerialize(store);
 
     const values = await store.get(MESSAGES_KEY);
-    console.log("wake up get messages", values);
     if (values) {
       const messages = decode(values);
       globalContext.storage = noSerialize(messages);

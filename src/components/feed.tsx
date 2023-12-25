@@ -8,14 +8,13 @@ export default component$(() => {
   const globalContext = useContext(GlobalContext);
   const posts = useComputed$(() => {
     if (!globalContext.storage) return [];
-    const _posts = Object.values(globalContext.storage.messages)
+    const _posts = globalContext.storage.messages
       .map((m) => {
         if (!m.payload.post) return null;
         const post = toPost(m, m.payload.post);
         return post;
       })
       .filter(notEmpty)
-      .sort((a, b) => b.created_at - a.created_at);
     return _posts;
   });
 

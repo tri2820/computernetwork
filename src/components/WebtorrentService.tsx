@@ -15,22 +15,19 @@ import type {
 import t_computernetwork from "~/lib/t_computernetwork";
 import {
   add,
-  equal,
+  addMessagesToStorage,
   hashOf,
-  notEmpty,
-  toPost,
   uint8ArrayToString,
+  uint8equal
 } from "~/lib/utils";
 import { GlobalContext } from "~/routes/layout";
 // @ts-ignore
 import idbKVStore from "idb-kv-store";
-import type {
-  Payload,
-  Message,
-  QueryPostResultPayload,
-  PostPayload,
-} from "~/me";
 import ParseTorrent from "parse-torrent";
+import type {
+  Message,
+  Payload
+} from "~/app";
 import { Identity } from "~/lib/identity";
 
 const magnetURI =
@@ -39,32 +36,15 @@ const magnetURI =
 export default component$(() => {
   const globalContext = useContext(GlobalContext);
 
-  const store = $((messages: Message[]) => {
-    const changes = messages.reduce(
-      (prev, cur) => ({
-        ...prev,
-        [uint8ArrayToString(cur.hash)]: cur,
-      }),
-      {},
-    );
-
-    globalContext.storage = noSerialize({
-      messages: {
-        ...globalContext.storage?.messages,
-        ...changes,
-      },
-    });
-  });
-
-  const onExtendedHandshake: OnExtendedHandshakeType = $((_this, handshake) => {
+  const onExtendedHandshake: OnExtendedHandshakeType = $(async (_this, handshake) => {
     const payload: Payload = {
       query_post: {},
     };
-    const message = globalContext.identity!.sign(payload);
+    const message = await globalContext.identity!.sign(payload);
     _this.send(message);
   });
 
-  const onMessage: OnMessageType = $((_this, buf) => {
+  const onMessage: OnMessageType = $(async (_this, buf) => {
     // Buffer looks like <length>:<sent_data> for some reason
     const colonPosition = buf.findIndex((x) => x == 58);
     if (colonPosition == -1) return;
@@ -89,20 +69,20 @@ export default component$(() => {
     }
 
     const hash = hashOf(message.payload);
-    if (!equal(hash, message.hash)) {
+    if (!uint8equal(hash, message.hash)) {
       console.warn("Incorrect hash", hash, message.hash);
       return;
     }
 
     // Store messages of important types
     if (message.payload.post) {
-      store([message]);
+      addMessagesToStorage(globalContext, [message]);
     }
 
     if (message.payload.query_post) {
       console.log("Peer asked for posts in my DB");
       if (!globalContext.storage) return;
-      const postMessages = Object.values(globalContext.storage.messages).filter(
+      const postMessages = globalContext.storage.messages.filter(
         (m) => m.payload.post,
       );
       if (postMessages.length == 0) return;
@@ -112,7 +92,7 @@ export default component$(() => {
           data: postMessages.slice(0, 100),
         },
       };
-      const query_post_result_message = globalContext.identity!.sign(
+      const query_post_result_message = await globalContext.identity!.sign(
         query_post_result_payload,
       );
       _this.send(query_post_result_message);
@@ -120,13 +100,16 @@ export default component$(() => {
 
     if (message.payload.query_post_result) {
       if (message.payload.query_post_result.data) {
-        store(message.payload.query_post_result.data);
+        addMessagesToStorage(globalContext, message.payload.query_post_result.data);
       }
     }
   });
 
   useVisibleTask$(async ({ track }) => {
     window.Buffer = Buffer;
+
+    // For inspection
+    window.globalContext = globalContext;
 
     await _sodium.ready;
     window.sodium = _sodium;
@@ -160,6 +143,7 @@ export default component$(() => {
       peerId: id,
     });
     console.log(webtorrent);
+
     globalContext.webtorrent = noSerialize(webtorrent);
 
     const { torrent } = add(magnetURI, webtorrent);

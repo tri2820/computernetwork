@@ -1,7 +1,7 @@
 import { Wire } from 'bittorrent-protocol';
 import { EventEmitter } from 'events';
 import { QRL } from '@builder.io/qwik';
-import { Message } from '~/me';
+import { Message } from '~/app';
 import { encode } from 'cbor-x';
 
 const NAME = 't_computernetwork';

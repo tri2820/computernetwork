@@ -1,4 +1,4 @@
-import type { NoSerialize } from "@builder.io/qwik";
+import type { NoSerialize, QRL, Signal } from "@builder.io/qwik";
 import {
   $,
   component$,
@@ -8,14 +8,19 @@ import {
   useVisibleTask$,
 } from "@builder.io/qwik";
 import { HiHeartOutline } from "@qwikest/icons/heroicons";
+import { Payload } from "~/app";
+import { tif, ts_unix_now } from "~/lib/utils";
 
-const tif = (cond: boolean, classNamesTrue: string, classNamesFalse = "") => {
-  return cond ? ` ${classNamesTrue} ` : ` ${classNamesFalse} `;
+export type HeartButtonProps = {
+  onClick?: QRL<() => void>;
+  count: Signal<number>;
+  hearted: Signal<boolean>;
 };
 
-export default component$(() => {
+export default component$(({ onClick, count, hearted }: HeartButtonProps) => {
   const elId = useSignal(`heart-${Math.random()}`);
   const animation = useSignal<NoSerialize<any>>(null);
+  const clicked = useSignal(false);
 
   useVisibleTask$(async () => {
     console.log("debug load animation");
@@ -30,22 +35,14 @@ export default component$(() => {
     animation.value = noSerialize(anim);
   });
 
-  const hearted = useSignal(false);
-  const clicked = useSignal(false);
-  const count = useSignal(0);
-
   const handleButtonClicked = $(() => {
     clicked.value = true;
-
-    hearted.value = !hearted.value;
-    count.value = hearted.value ? 1 : 0;
-    const frame = animation.value?.getDuration(true);
-    console.log("frame", frame);
-
-    if (hearted.value) {
+    if (!hearted.value) {
       animation.value?.goToAndPlay(0, true);
     }
+    onClick?.();
   });
+
 
   return (
     <div class="flex items-center space-x-1 ">
