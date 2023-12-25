@@ -141,9 +141,7 @@ export default component$(() => {
             <p>Post</p>
           </button>
         </div>
-        {showError.value && (
-          <p class="text-red-500">Write something for your post first.</p>
-        )}
+        {showError.value && <p class="text-red-500">Write something first.</p>}
       </div>
     </div>
   );
