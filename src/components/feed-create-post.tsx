@@ -18,6 +18,7 @@ export default component$(() => {
   const content = useSignal<string>();
   const file = useSignal<NoSerialize<File>>();
   const globalContext = useContext(GlobalContext);
+  const showError = useSignal(false);
 
   const attachmentDelete = $(() => {
     file.value = undefined;
@@ -26,6 +27,7 @@ export default component$(() => {
   const reset = $(() => {
     content.value = undefined;
     file.value = undefined;
+    showError.value = false;
   });
 
   const onFileChange = $((e: any) => {
@@ -37,7 +39,9 @@ export default component$(() => {
   });
 
   const submit = $(async (e: Event) => {
-    if (!content.value) {
+    const _content = content.value?.trim();
+    if (!_content) {
+      showError.value = true;
       console.log("nothing to submit");
       return;
     }
@@ -69,7 +73,7 @@ export default component$(() => {
     const data: Data = {
       post: {
         file: _file,
-        content: content.value.trim(),
+        content: _content,
       },
     };
 
@@ -137,6 +141,9 @@ export default component$(() => {
             <p>Post</p>
           </button>
         </div>
+        {showError.value && (
+          <p class="text-red-500">Write something for your post first.</p>
+        )}
       </div>
     </div>
   );
