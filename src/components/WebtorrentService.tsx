@@ -129,7 +129,11 @@ export default component$(() => {
     if (values) {
       const storage: Storage = decode(values);
       console.log('load storage', uint8ArrayToString(storage!.identity.keyPair.publicKey));
-      globalContext.storage = noSerialize(storage)
+      globalContext.storage = noSerialize({
+        ...storage,
+        // Turn back into class
+        identity: new Identity(storage.identity.keyPair)
+      })
     } else {
       globalContext.storage = noSerialize({
         messages: [],

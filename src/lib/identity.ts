@@ -6,8 +6,8 @@ import { hashOf, ts_stamp_now, ts_unix_now, ts_verify } from "./utils";
 
 export class Identity {
     keyPair: KeyPair;
-    constructor() {
-        this.keyPair = window.sodium.crypto_sign_keypair();
+    constructor(keyPair?: KeyPair) {
+        this.keyPair = keyPair ?? window.sodium.crypto_sign_keypair();
     }
 
     async sign(payload: Payload) {

@@ -45,7 +45,7 @@ export default component$(({ post }: { post: Post }) => {
         for_message_hash: stringToUInt8Array(post.id)
       },
     };
-
+    console.log('globalContext.storage', globalContext.storage);
     const message = await globalContext.storage!.identity.sign(payload);
     addMessagesToStorage(globalContext, [message]);
 
