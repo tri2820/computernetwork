@@ -44,7 +44,7 @@ export default component$(() => {
     <>
       <WebtorrentService />
       <div class="relative flex min-h-screen flex-col bg-neutral-950  text-neutral-50">
-        <TopBar />
+        {/* <TopBar /> */}
         <Slot />
       </div>
     </>

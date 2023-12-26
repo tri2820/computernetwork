@@ -14,12 +14,12 @@ export default component$(() => {
         const post = toPost(m, m.payload.data.post);
         return post;
       })
-      .filter(notEmpty)
+      .filter(notEmpty);
     return _posts;
   });
 
   return (
-    <div class="w-full flex-1 divide-y  divide-neutral-900 border-neutral-900 md:w-[600px] md:border-x">
+    <div class="my-16 w-full flex-1 divide-y divide-neutral-900 md:w-[600px]">
       <FeedCreatePost />
       {posts.value.map((post) => (
         <FeedCard key={post.id} post={post} />
