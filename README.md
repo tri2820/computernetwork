@@ -17,7 +17,7 @@ ComputerNetwork is a decentralized social network built on top of WebTorrent. It
 Under the hood, ComputerNetwork uses its own protocol, which is a [Torrent BEP-10 extension](https://www.bittorrent.org/beps/bep_0010.html).
 
 ## How to Use
-To use ComputerNetwork, visit https://computernetwork.io. You should see peers from the Internet start connecting and posts coming in. Keep your browser tab alive so people could connect to it.
+To use ComputerNetwork, visit https://computernetwork.app. You should see peers from the Internet start connecting and posts coming in. Keep your browser tab alive so people could connect to it.
 
 Note: If there are few active nodes, or if your node is behind NAT (Network Address Translation), connections over the Internet may not be possible. In this case, try the local setup as described below.
 
