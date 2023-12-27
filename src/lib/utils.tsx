@@ -53,8 +53,6 @@ export const seed = (input: string | string[] | File | File[] | FileList | Buffe
 export const add = (input: string | File | Buffer | ParseTorrentInstance, webtorrent: Instance,
     table_torrent_metadata?: any
 ) => {
-    // @ts-ignore
-    (typeof global === 'undefined' ? window : global).WEBTORRENT_ANNOUNCE = null;
     let torrent: Torrent | undefined;
     const torrentAwait = new Promise<Torrent | undefined>((resolve, reject) => {
         try {
