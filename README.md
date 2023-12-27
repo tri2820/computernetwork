@@ -1,5 +1,5 @@
 # ComputerNetwork
-ComputerNetwork is a decentralized social network built on top of WebTorrent. It enables users to establish browser-to-browser connections to share posts, files, and more. Join our [Discord server](https://discord.gg/5tECURau) to know more.
+ComputerNetwork is a decentralized social network built on top of WebTorrent. It enables users to establish browser-to-browser connections to share posts, files, etc. Join our [Discord server](https://discord.gg/5tECURau) to know more.
 
 ![Alt text](/public/screenshot.png)
 
