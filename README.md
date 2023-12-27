@@ -44,12 +44,16 @@ To deploy on Vercel:
 ### Self-hosted
 To run the app on your own server, execute these commands:
 ```shell
+bun i
 bun run build.types
 bun run lint
 bun run build.client
 bun run build.server.bun
 bun run serve
 ```
+
+## Data collection
+PostHog is currently used for logging to enhance app performance, and the logs are shared with the community.
 
 ## Known issues
 - In Brave browser, Brave Shield can sometimes block websocket connections. To ensure the app functions properly, you need to turn off Brave Shield.
