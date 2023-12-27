@@ -53,7 +53,7 @@ bun run serve
 ```
 
 ## Data collection
-PostHog is currently used for logging to enhance app performance, and the logs are shared with the community.
+PostHog is currently used for logging to improve the app, and the logs will be shared with the community.
 
 ## Known issues
 - In Brave browser, Brave Shield can sometimes block websocket connections. To ensure the app functions properly, you need to turn off Brave Shield.
