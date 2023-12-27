@@ -167,11 +167,42 @@ export default component$(() => {
       }
     });
 
+    // const rtcConfig =
+
     const webtorrent = new window.WebTorrent({
       // @ts-ignore
       nodeId: id,
       // @ts-ignore
       peerId: id,
+
+      tracker: {
+        // Public TURN & STUN, to be removed
+        iceServers: [
+          {
+            urls: "stun:stun.relay.metered.ca:80",
+          },
+          {
+            urls: "turn:standard.relay.metered.ca:80",
+            username: "547f0f63599430b23044c4ec",
+            credential: "ISNpI6ggITJGSd8t",
+          },
+          {
+            urls: "turn:standard.relay.metered.ca:80?transport=tcp",
+            username: "547f0f63599430b23044c4ec",
+            credential: "ISNpI6ggITJGSd8t",
+          },
+          {
+            urls: "turn:standard.relay.metered.ca:443",
+            username: "547f0f63599430b23044c4ec",
+            credential: "ISNpI6ggITJGSd8t",
+          },
+          {
+            urls: "turn:standard.relay.metered.ca:443?transport=tcp",
+            username: "547f0f63599430b23044c4ec",
+            credential: "ISNpI6ggITJGSd8t",
+          },
+        ],
+      },
     });
     console.log(webtorrent);
 
