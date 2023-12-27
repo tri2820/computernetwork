@@ -26,7 +26,7 @@ class t_computernetwork extends EventEmitter {
             console.log('skip sending to', this.wire.peerId);
             return
         }
-        console.log('send', buffer);
+        console.log('send...');
         this.wire.extended(NAME, buffer);
     }
 
