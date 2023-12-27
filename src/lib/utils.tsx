@@ -2,9 +2,9 @@ import { Instance, Torrent } from "webtorrent";
 import { GlobalContextType, Message, Post, PostData, Result } from "~/app";
 
 
+import { noSerialize } from "@builder.io/qwik";
 import { Buffer } from "buffer";
 import { encode } from "cbor-x";
-import { noSerialize } from "@builder.io/qwik";
 // @ts-ignore
 import idbChunkStore from "idb-chunk-store";
 import type { Instance as ParseTorrentInstance } from "parse-torrent";
@@ -53,11 +53,21 @@ export const seed = (input: string | string[] | File | File[] | FileList | Buffe
 export const add = (input: string | File | Buffer | ParseTorrentInstance, webtorrent: Instance,
     table_torrent_metadata?: any
 ) => {
+    // @ts-ignore
+    (typeof global === 'undefined' ? window : global).WEBTORRENT_ANNOUNCE = null;
     let torrent: Torrent | undefined;
     const torrentAwait = new Promise<Torrent | undefined>((resolve, reject) => {
         try {
             torrent = webtorrent.add(input, {
-                store: idbChunkStore
+                store: idbChunkStore,
+                announce: [
+                    // "wss://tracker.webtorrent.io",
+                    "wss://tracker.fastcast.nz",
+                    "wss://tracker.btorrent.xyz",
+                    "wss://tracker.novage.com.ua",
+                    // "wss://peertube2.cpy.re/tracker/socket",
+                    "wss://tracker.openwebtorrent.com"
+                ]
             }, (t) => {
                 resolve(t)
             });
