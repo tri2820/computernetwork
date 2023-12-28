@@ -59,6 +59,7 @@ export const add = (input: string | File | Buffer | ParseTorrentInstance, webtor
             torrent = webtorrent.add(input, {
                 store: idbChunkStore,
                 announce: [
+                    "wss://100.70.227.1:5555",
                     // "wss://tracker.webtorrent.io",
                     "wss://tracker.fastcast.nz",
                     "wss://tracker.btorrent.xyz",
