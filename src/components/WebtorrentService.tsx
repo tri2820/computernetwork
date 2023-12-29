@@ -27,7 +27,8 @@ import ParseTorrent from "parse-torrent";
 import type { Data, Message, Payload, Storage } from "~/app";
 import { Identity } from "~/lib/identity";
 
-const magnetURI = "magnet:?xt=urn:btih:00000000000000000000000000000000000000";
+const magnetURI =
+  "magnet:?xt=urn:btih:6b44daa2a9cd6266ea71e7fcdd4a86f75207ca33&dn=computernetwork";
 const STORAGE_KEY = "STORAGE";
 
 export default component$(() => {
